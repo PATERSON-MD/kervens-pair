@@ -1,0 +1,19 @@
+build:
+  buildpacks:
+    - heroku/nodejs
+    - heroku-community/apt
+    - jontewks/puppeteer
+
+run:
+  web: npm start
+
+setup:
+  addons:
+    - plan: heroku-redis
+      as: REDIS
+
+config:
+  NODE_ENV: production
+  TZ: Africa/Harare
+  NPM_CONFIG_PRODUCTION: false
+  DISABLE_WEBSOCKETS: false
