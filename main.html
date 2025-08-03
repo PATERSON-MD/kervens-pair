@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="" type="image/x-icon">
+  <style>
+    body {
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: linear-gradient(to bottom, #000000, #1a1a1a, #2d2d2d);
+    }
+
+    .button-container {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: rgba(30, 30, 30, 0.8);
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0, 255, 0, 0.3);
+    }
+
+    h3 {
+      margin-top: -20px;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: fadeIn 3s forwards;
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+      font-size: 1.8rem;
+    }
+
+    .button {
+      width: 220px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0px 15px;
+      background-color: red;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      position: relative;
+      cursor: pointer;
+      font-weight: 900;
+      transition-duration: .2s;
+      background: linear-gradient(0deg, #000, #272727);
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #111;
+      color: #00ff00;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 0 5px #00ff00;
+    }
+    
+    .button:before, .button:after {
+      content: '';
+      position: absolute;
+      left: -2px;
+      top: -2px;
+      border-radius: 10px;
+      background: linear-gradient(45deg, #48ff00, #15ff00, #000000,#000000, #ff0000);
+      background-size: 400%;
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      z-index: -1;
+      animation: steam 10s linear infinite;
+    }
+
+    @keyframes steam {
+      0% {
+        background-position: 0 0;
+      }
+      50% {
+        background-position: 400% 0;
+      }
+      100% {
+        background-position: 0 0;
+      }
+    }
+
+    .button:after {
+      filter: blur(50px);
+    }
+
+    .button span {
+      z-index: 1;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+    
+    .info-text {
+      margin: 15px 0;
+      color: #aaa;
+      font-size: 0.9rem;
+      text-align: center;
+      max-width: 300px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00ff00, #008800);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <div class="logo">P</div>
+    <h3>KERVENS SESSION</h3>
+    
+    <a href="/qr" class="button" target="_blank"> 
+      <span>QR-CODE</span>
+    </a>
+    
+    <a href="/pair" class="button" target="_blank"> 
+      <span>PAIRING-CODE</span>
+    </a>
+    
+    <a href="https://github.com/PATERSON-MD/PATERSON-MD/fork" class="button" target="_blank"> 
+      <span>FORK PATERSON-MD</span>
+    </a>
+    
+    <a href="https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20" class="button" target="_blank"> 
+      <span>WHATSAPP CHANNEL</span>
+    </a>
+
+    <p class="info-text">Pour toute assistance technique, contactez-nous :</p>
+    
+    <a href="https://wa.me/50942737567" class="button" target="_blank"> 
+      <span>SUPPORT TECHNIQUE</span>
+    </a>
+
+    <footer>
+     PATERSON-MD &copy; <span id="currentYear"></span> | Créé par Kervens Aubourg
+    </footer>
+  </div>
+  
+  <script>
+    // Ajouter l'année actuelle dans le footer
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    
+    // Animation supplémentaire pour les boutons
+    document.querySelectorAll('.button').forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        button.style.transform = 'scale(1.05)';
+      });
+      
+      button.addEventListener('mouseleave', () => {
+        button.style.transform = 'scale(1)';
+      });
+    });
+  </script>
+</body>
+  </html>
