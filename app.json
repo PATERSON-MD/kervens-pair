@@ -1,0 +1,58 @@
+{
+    "name": "PATERSON-MD Session Generator",
+    "description": "Secure WhatsApp session generator with cloud storage",
+    "logo": "https://i.ibb.co/pXL9RYv/temp-image.jpg",
+    "repository": "https://github.com/KervensAubourg/PATERSON-MD",
+    "keywords": [
+        "PATERSON-MD", 
+        "WhatsApp-Bot", 
+        "Baileys", 
+        "Session-Generator",
+        "KervensAubourg"
+    ],
+    "success_url": "/", 
+    "buildpacks": [
+        { 
+            "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest" 
+        },
+        {
+            "url": "https://github.com/jontewks/puppeteer-heroku-buildpack"
+        }
+    ],
+    "env": {      
+        "PORT": {
+            "description": "Port for web application",
+            "value": "5000",
+            "required": false 
+        },
+        "MEGA_EMAIL": {
+            "description": "Your MEGA.nz account email",
+            "required": true
+        },
+        "MEGA_PASSWORD": {
+            "description": "Your MEGA.nz account password",
+            "required": true
+        },
+        "TZ": {
+            "description": "Timezone for the application",
+            "value": "Africa/Harare",
+            "required": false
+        },
+        "NODE_ENV": {
+            "description": "Node environment",
+            "value": "production",
+            "required": false
+        }
+    },
+    "formation": {
+        "web": {
+            "quantity": 1,
+            "size": "free"
+        }
+    },
+    "addons": [
+        {
+            "plan": "heroku-redis:hobby-dev"
+        }
+    ]
+}
