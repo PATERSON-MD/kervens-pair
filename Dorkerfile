@@ -1,0 +1,56 @@
+FROM node:lts-bullseye
+
+# Mise à jour et installation des dépendances système
+RUN apt-get update && \
+    apt-get install -y \
+    ffmpeg \
+    imagemagick \
+    webp \
+    ghostscript \
+    libwebp-dev \
+    libopus-dev \
+    libopus0 \
+    libnss3 \
+    libnspr4 \
+    libgbm-dev \
+    libglib2.0-dev \
+    libxi6 \
+    libgconf-2-4 \
+    libxext6 \
+    libxss1 \
+    libxcb1 \
+    libx11-xcb1 \
+    libxcb-dri3-0 \
+    libdrm2 \
+    libxtst6 \
+    libasound2 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libpangocairo-1.0-0 \
+    libgtk-3-0 \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Création de l'utilisateur non-root pour la sécurité
+RUN useradd -m paterson
+USER paterson
+WORKDIR /home/paterson/app
+
+# Copie des fichiers de dépendances
+COPY --chown=paterson:paterson package*.json ./
+
+# Installation des dépendances
+RUN npm install --omit=dev && \
+    npm install -g pm2
+
+# Copie de l'application
+COPY --chown=paterson:paterson . .
+
+# Configuration des variables d'environnement
+ENV NODE_ENV=production
+ENV PORT=5000
+ENV TZ=Africa/Harare
+
+# Exposition du port et démarrage de l'application
+EXPOSE 5000
+CMD ["pm2-runtime", "start", "server.js", "--name", "PATERSON-MD"]
