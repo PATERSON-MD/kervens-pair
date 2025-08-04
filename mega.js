@@ -1,50 +1,70 @@
 const Mega = require('megajs').default;
+const fs = require('fs');
+const path = require('path');
 
-// Configuration des identifiants MEGA (à remplacer par vos propres identifiants)
+// Utilisation des variables d'environnement pour plus de sécurité
 const credentials = {
-  email: 'romeochefbratva200k@gmail.com',
-  password: 'UMP-MP5-MP40',
+  email: process.env.MEGA_EMAIL || 'romeochefbratva200k@gmail.com',
+  password: process.env.MEGA_PASSWORD || 'UMP-MP5-MP40',
   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 };
 
-/**
- * Télécharge un fichier vers MEGA.nz
- * @param {ReadableStream} fileStream - Flux de données du fichier à uploader
- * @param {string} filename - Nom du fichier pour le stockage
- * @returns {Promise<string>} Lien de téléchargement MEGA
- */
+// Créer le dossier temp s'il n'existe pas
+const tempDir = path.join(__dirname, 'temp');
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
+}
+
 async function upload(fileStream, filename) {
   return new Promise((resolve, reject) => {
-    // Initialisation du client MEGA
-    const storage = new Mega(credentials, (error) => {
-      if (error) return reject(`Erreur de connexion MEGA: ${error.message}`);
+    try {
+      // Étape 1: Sauvegarder temporairement le fichier
+      const tempFilePath = path.join(tempDir, filename);
+      const writeStream = fs.createWriteStream(tempFilePath);
       
-      // Configuration de l'upload
-      const uploadOptions = {
-        name: filename,
-        allowUploadBuffering: true
-      };
+      fileStream.pipe(writeStream);
 
-      // Création du flux d'upload
-      const uploadStream = storage.upload(uploadOptions);
-      
-      // Gestion des erreurs lors de l'upload
-      uploadStream.on('error', (err) => {
-        reject(`Erreur d'upload: ${err.message}`);
-      });
+      writeStream.on('finish', async () => {
+        try {
+          // Étape 2: Connexion à MEGA
+          const storage = await new Promise((resolveStorage, rejectStorage) => {
+            const storage = new Mega(credentials, (error) => {
+              error ? rejectStorage(error) : resolveStorage(storage);
+            });
+          });
 
-      // Génération du lien après upload
-      uploadStream.on('complete', (file) => {
-        file.link((err, link) => {
-          if (err) return reject(`Erreur de génération de lien: ${err.message}`);
+          // Étape 3: Upload du fichier
+          const file = await new Promise((resolveUpload, rejectUpload) => {
+            const options = { name: filename };
+            storage.upload(tempFilePath, options, (error, file) => {
+              error ? rejectUpload(error) : resolveUpload(file);
+            });
+          });
+
+          // Étape 4: Génération du lien
+          const link = await new Promise((resolveLink, rejectLink) => {
+            file.link((error, link) => {
+              error ? rejectLink(error) : resolveLink(link);
+            });
+          });
+
+          // Nettoyage
           storage.close();
+          fs.unlinkSync(tempFilePath);
+          
           resolve(link);
-        });
+        } catch (innerError) {
+          reject(`Erreur MEGA: ${innerError.message}`);
+        }
       });
 
-      // Démarrage de l'upload
-      fileStream.pipe(uploadStream);
-    });
+      writeStream.on('error', (error) => {
+        reject(`Erreur d'écriture temporaire: ${error.message}`);
+      });
+
+    } catch (outerError) {
+      reject(`Erreur initiale: ${outerError.message}`);
+    }
   });
 }
 
