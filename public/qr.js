@@ -97,7 +97,7 @@ https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20
 
 *💻 Source Code:*  
 Fork & explore the project on GitHub:  
-https://github.com/KervensAubourg/PATERSON-MD
+https://github.com/PATERSON-MD/PATERSON-MD
 
 ——————
 
@@ -260,7 +260,7 @@ https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20
 
 *💻 Source Code:*  
 Fork & explore the project on GitHub:  
-https://github.com/KervensAubourg/PATERSON-MD
+https://github.com/PATERSON-MD/PATERSON-MD
 
 ——————
 
