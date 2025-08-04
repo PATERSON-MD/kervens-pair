@@ -15,13 +15,28 @@ app.use(express.static(path.join(__path, 'public')));
 // Optimisation des écouteurs d'événements
 require('events').EventEmitter.defaultMaxListeners = 100;
 
-// Import des routes
-const qrRouter = require('./routes/qr');
-const pairRouter = require('./routes/pair');
+// DEBUG: Vérification des fichiers critiques
+const fs = require('fs');
+console.log("[DEBUG] Vérification des routes...");
 
-// Routes API
-app.use('/server', qrRouter);    // Pour les QR codes
-app.use('/code', pairRouter);    // Pour les pairing codes
+try {
+    // Import des routes avec vérification
+    console.log("[DEBUG] Chargement de ./routes/qr");
+    const qrRouter = require('./routes/qr');
+    console.log("[SUCCESS] Route QR chargée");
+    
+    console.log("[DEBUG] Chargement de ./routes/pair");
+    const pairRouter = require('./routes/pair');
+    console.log("[SUCCESS] Route Pair chargée");
+    
+    // Routes API
+    app.use('/server', qrRouter);    // Pour les QR codes
+    app.use('/code', pairRouter);    // Pour les pairing codes
+    
+} catch (e) {
+    console.error("[CRITICAL] Erreur de chargement des routes:", e);
+    process.exit(1);
+}
 
 // Routes HTML
 app.get('/', (req, res) => {
@@ -52,7 +67,7 @@ app.use((req, res) => {
 });
 
 // Démarrage du serveur
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`
   ╔══════════════════════════════════════════╗
   ║                                          ║
@@ -67,7 +82,7 @@ app.listen(PORT, () => {
   `);
 });
 
-// Arrêt gracieux (optionnel pour Render)
+// Arrêt gracieux (important pour Render)
 process.on('SIGTERM', () => {
     console.log('[PATERSON-MD] Received SIGTERM. Shutting down gracefully...');
     server.close(() => {
