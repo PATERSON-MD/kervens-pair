@@ -2,12 +2,12 @@
   "name": "paterson-md",
   "version": "1.0.0",
   "description": "Advanced WhatsApp Bot with QR Pairing and Cloud Session Management",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=production pm2 start server.js --name PATERSON-MD --watch --no-daemon --time",
+    "start": "NODE_ENV=production node index.js",
     "stop": "pm2 stop PATERSON-MD",
     "restart": "pm2 restart PATERSON-MD",
-    "dev": "NODE_ENV=development node server.js",
+    "dev": "NODE_ENV=development node index.js",
     "test": "jest --coverage",
     "lint": "eslint ."
   },
