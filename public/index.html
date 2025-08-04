@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PATERSON-MD | Générateur de Session WhatsApp</title>
+    <link rel="shortcut icon" href="https://i.ibb.co/pXL9RYv/temp-image.jpg" type="image/x-icon">
+    <style>
+        :root {
+            --primary-color: #8a2be2;
+            --secondary-color: #4b0082;
+            --accent-color: #32cd32;
+            --background-gradient: linear-gradient(135deg, #4a90e2, #3ac569, #9b59b6, #e74c3c);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--background-gradient);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, transparent 60%, rgba(255,255,255,0.2) 100%);
+            animation: rotate 6s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .logo-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        .card {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, transparent 70%, rgba(138, 43, 226, 0.1) 100%);
+            z-index: 0;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px rgba(50, 205, 50, 0.7);
+            background: linear-gradient(to right, var(--accent-color), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #ddd;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.6);
+        }
+        
+        .btn:hover::before {
+            opacity: 1;
+        }
+        
+        .btn-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover .btn-icon {
+            transform: scale(1.2);
+        }
+        
+        .info-text {
+            margin-top: 25px;
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+        
+        .highlight:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        
+        footer {
+            margin-top: 30px;
+            color: #ddd;
+            text-align: center;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        .creator {
+            color: var(--accent-color);
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .creator::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+        
+        .creator:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+        
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particules animées en fond -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="logo">
+            <div class="logo-text">P</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-content">
+                <h1>PATERSON-MD</h1>
+                <p class="subtitle">Générateur de Session WhatsApp - Créez des sessions sécurisées pour votre bot WhatsApp en quelques clics</p>
+                
+                <div class="btn-container">
+                    <a href="/qr" class="btn" target="_blank">
+                        <span class="btn-icon">📱</span>
+                        <span>Connexion par QR Code</span>
+                    </a>
+                    
+                    <a href="/pair" class="btn" target="_blank">
+                        <span class="btn-icon">🔢</span>
+                        <span>Connexion par Pairing Code</span>
+                    </a>
+                    
+                    <a href="https://github.com/PATERSON-MD" class="btn" target="_blank">
+                        <span class="btn-icon">⚡</span>
+                        <span>GitHub PATERSON-MD</span>
+                    </a>
+                    
+                    <a href="https://wa.me/50942737567" class="btn" target="_blank">
+                        <span class="btn-icon">💬</span>
+                        <span>Support WhatsApp</span>
+                    </a>
+                </div>
+                
+                <p class="info-text">
+                    En cas de problème, contactez notre équipe via WhatsApp en cliquant sur 
+                    <span class="highlight">"Support WhatsApp"</span>.
+                    <br>
+                    Toutes les sessions sont stockées de manière sécurisée sur 
+                    <span class="highlight">MEGA.nz</span> avec un chiffrement de niveau militaire.
+                </p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>PATERSON-MD © <span id="current-year"></span> - Tous droits réservés</p>
+            <p>Créé avec ❤️ par <span class="creator">Kervens Aubourg</span></p>
+        </footer>
+    </div>
+    
+    <script>
+        // Mettre à jour l'année dans le footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // Animation au survol des boutons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'translateY(-3px)';
+                btn.style.boxShadow = '0 8px 20px rgba(138, 43, 226, 0.6)';
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translateY(0)';
+                btn.style.boxShadow = '0 5px 15px rgba(138, 43, 226, 0.4)';
+            });
+        });
+        
+        // Création des particules animées
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Taille aléatoire
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Position initiale aléatoire
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Couleur aléatoire
+                const colors = ['#8a2be2', '#32cd32', '#4a90e2', '#e74c3c', '#9b59b6'];
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Animation aléatoire
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Initialiser les particules
+        window.addEventListener('load', createParticles);
+    </script>
+</body>
+  </html>
