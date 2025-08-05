@@ -1,4 +1,4 @@
-const { makeid } = require('./gen-id');
+const { makeid } = require('../gen-id');
 const express = require('express');
 const fs = require('fs');
 let router = express.Router();
