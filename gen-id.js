@@ -1,4 +1,15 @@
 function makeid(length = 12) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Caractères non ambigus
+  let result = '';
+  
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  return result;
+}
+
+module.exports = { makeid };function makeid(length = 12) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
   const allChars = characters + specialChars;
