@@ -1,16 +1,16 @@
-const { makeid } = require('./gen-id');
+const { makeid } = require('../gen-id'); 
 const express = require('express');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const router = express.Router();
 const pino = require("pino");
-const {
-    default: makeWASocket,
-    useMultiFileAuthState,
-    delay,
-    Browsers
+const { 
+  default: makeWASocket,
+  useMultiFileAuthState,
+  delay,
+  Browsers
 } = require("@whiskeysockets/baileys");
-const { upload } = require('./mega');
+const { upload } = require('../mega');
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
