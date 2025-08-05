@@ -2,38 +2,65 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const { makeid } = require('./gen-id'); // Ajout de l'import
+const { makeid } = require('./gen-id'); // Importation du générateur d'ID
 
 const app = express();
 const __path = __dirname;
 const PORT = process.env.PORT || 5000;
 
-// Middlewares (inchangé)
+// Middlewares
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__path, 'public')));
 
-// Vérification des fichiers (modifié)
+// Augmentation limite des écouteurs
+require('events').EventEmitter.defaultMaxListeners = 100;
+
+// Vérification des fichiers critiques
 console.log("[INIT] Vérification des fichiers...");
 const requiredFiles = [
-  'gen-id.js', // Nouveau fichier à vérifier
-  'public/index.html',
-  'public/qr.html', 
-  'public/pair.html',
-  'public/404.html'
+    'gen-id.js', // Nouveau fichier ajouté
+    'public/index.html',
+    'public/qr.html',
+    'public/pair.html',
+    'public/404.html'
 ];
 
 requiredFiles.forEach(file => {
-  const filePath = path.join(__path, file);
-  if (!fs.existsSync(filePath)) {
-    console.error(`[MISSING] ${file}`);
-    if (file === 'public/404.html') {
-      fs.writeFileSync(filePath, '<h1>404 Not Found</h1><a href="/">Home</a>');
-      console.log(`[CREATED] ${file}`);
+    const filePath = path.join(__path, file);
+    
+    if (fs.existsSync(filePath)) {
+        console.log(`[OK] ${file}`);
+    } else {
+        console.error(`[MISSING] ${file}`);
+        
+        // Création automatique du fichier 404.html si manquant
+        if (file === 'public/404.html') {
+            try {
+                const content = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>404 Not Found</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        h1 { color: #ff0000; }
+        a { color: #0066cc; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>404 Error</h1>
+    <p>Page not found</p>
+    <p><a href="/">Return to homepage</a></p>
+</body>
+</html>`;
+                fs.writeFileSync(filePath, content);
+                console.log(`[CREATED] ${file}`);
+            } catch (e) {
+                console.error(`[ERROR] Failed to create ${file}:`, e.message);
+            }
+        }
     }
-  } else {
-    console.log(`[OK] ${file}`);
-  }
 });
 
 // Chargement des routes
@@ -88,5 +115,8 @@ app.listen(PORT, '0.0.0.0', () => {
   ║   ➜ http://localhost:${PORT}         ║
   ║                                      ║
   ╚══════════════════════════════════════╝
+  
+  GitHub: https://github.com/PATERSON-MD/PATERSON-MD
+  WhatsApp Channel: https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20
   `);
 });
