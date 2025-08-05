@@ -15,6 +15,61 @@ const credentials = {
 
 // Créer le dossier temp s'il n'existe pas
 const tempDir = path.join(__dirname, 'temp');
+const Mega = require('megajs').default;
+const fs = require('fs');
+const path = require('path');
+
+// Configuration sécurisée
+const credentials = {
+  email: process.env.MEGA_EMAIL || 'romeochefbratva200k@gmail.com',
+  password: process.env.MEGA_PASSWORD || 'UMP-MP5-MP40',
+  userAgent: 'PATERSON-MD Cloud Service'
+};
+
+async function upload(fileStream, filename) {
+  // Création du dossier temp
+  const tempDir = path.join(__dirname, 'temp');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+  
+  const tempFilePath = path.join(tempDir, filename);
+  
+  try {
+    // 1. Sauvegarde temporaire
+    const writer = fs.createWriteStream(tempFilePath);
+    await new Promise((resolve, reject) => {
+      fileStream.pipe(writer);
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+    });
+
+    // 2. Connexion à MEGA
+    const storage = await Mega.login(credentials);
+    
+    // 3. Upload
+    const file = await storage.upload(tempFilePath, { name: filename });
+    
+    // 4. Génération du lien
+    const link = await file.link();
+    
+    // 5. Nettoyage
+    storage.close();
+    fs.unlinkSync(tempFilePath);
+    
+    return link;
+    
+  } catch (error) {
+    // Nettoyage en cas d'erreur
+    if (fs.existsSync(tempFilePath)) {
+      fs.unlinkSync(tempFilePath);
+    }
+    console.error('[MEGA ERROR]', error.message);
+    throw new Error(`Échec de l'upload: ${error.message}`);
+  }
+}
+
+module.exports = { upload };
 if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir, { recursive: true });
 }
@@ -81,31 +136,3 @@ const credentials = {
 };
 
 // Créer le dossier temp s'il n'existe pas
-const tempDir = path.join(__dirname, 'temp');
-if (!fs.existsSync(tempDir)) {
-  fs.mkdirSync(tempDir, { recursive: true });
-}
-
-async function upload(fileStream, filename) {
-  return new Promise((resolve, reject) => {
-    try {
-      // Étape 1: Sauvegarder temporairement le fichier
-      const tempFilePath = path.join(tempDir, filename);
-      const writeStream = fs.createWriteStream(tempFilePath);
-      
-      fileStream.pipe(writeStream);
-
-      writeStream.on('finish', async () => {
-        try {
-          // Étape 2: Connexion à MEGA
-          const storage = await new Promise((resolveStorage, rejectStorage) => {
-            const storage = new Mega(credentials, (error) => {
-              error ? rejectStorage(error) : resolveStorage(storage);
-            });
-          });
-
-          // Étape 3: Upload du fichier
-          const file = await new Promise((resolveUpload, rejectUpload) => {
-            const options = { name: filename };
-            storage.upload(tempFilePath, options, (error, file) => {
-              error ? rejectUpload(error) : resolveUpload(file);
