@@ -2,33 +2,38 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const { makeid } = require('./gen-id'); // Ajout de l'import
 
 const app = express();
 const __path = __dirname;
 const PORT = process.env.PORT || 5000;
 
-// Middlewares
+// Middlewares (inchangé)
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__path, 'public')));
 
-// Augmentation limite des écouteurs
-require('events').EventEmitter.defaultMaxListeners = 100;
-
-// Vérification des fichiers critiques
+// Vérification des fichiers (modifié)
 console.log("[INIT] Vérification des fichiers...");
-const requiredFiles = ['index.html', 'qr.html', 'pair.html', '404.html'];
+const requiredFiles = [
+  'gen-id.js', // Nouveau fichier à vérifier
+  'public/index.html',
+  'public/qr.html', 
+  'public/pair.html',
+  'public/404.html'
+];
+
 requiredFiles.forEach(file => {
-    const filePath = path.join(__path, 'public', file);
-    if (fs.existsSync(filePath)) {
-        console.log(`[OK] ${file}`);
-    } else {
-        console.error(`[MISSING] ${file}`);
-        if (file === '404.html') {
-            fs.writeFileSync(filePath, '<h1>404 Not Found</h1><a href="/">Home</a>');
-            console.log(`[CREATED] ${file}`);
-        }
+  const filePath = path.join(__path, file);
+  if (!fs.existsSync(filePath)) {
+    console.error(`[MISSING] ${file}`);
+    if (file === 'public/404.html') {
+      fs.writeFileSync(filePath, '<h1>404 Not Found</h1><a href="/">Home</a>');
+      console.log(`[CREATED] ${file}`);
     }
+  } else {
+    console.log(`[OK] ${file}`);
+  }
 });
 
 // Chargement des routes
