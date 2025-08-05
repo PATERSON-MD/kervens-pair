@@ -4,7 +4,7 @@ const { lite, commands } = require('../lite');
 
 lite({
     pattern: "menu",
-    react: "😊",
+    react: "🔥",
     alias: ["allmenu", "cmd"],
     desc: "Affiche le menu complet avec contrôles de groupe",
     category: "main",
@@ -25,7 +25,7 @@ async (conn, mek, m, {
         const categories = {
             'group': '👥 COMMANDES GROUPE',
             'download': '📥 TÉLÉCHARGEMENTS',
-            'fun': '🎮 DIVERTISSEMENT & JEUX',  // Nom modifié pour inclure les jeux
+            'fun': '🎮 DIVERTISSEMENT & JEUX',
             'owner': '👑 ADMINISTRATION',
             'ai': '🧠 INTELLIGENCE ARTIFICIELLE',
             'bug': '🐞 BUG GROUP',
@@ -47,7 +47,7 @@ async (conn, mek, m, {
 
         // Construction du menu principal
         let madeMenu = `
-╭═══✦〔 🤖 *${config.PATERSON-MD}* 〕✦═══╮
+╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
 │ 👤 Utilisateur : ${pushname}
 │ ⚡ Préfixe     : [ ${config.PREFIX} ]
 │ 🛡️ Mode        : [ ${config.MODE} ]
