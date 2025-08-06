@@ -1,0 +1,65 @@
+# =============================================
+# .gitignore pour PATERSON-MD - WhatsApp Bot
+# =============================================
+
+# 🔒 Secrets et configurations sensibles
+.env
+.env.*
+config*.json
+secrets/
+keys/
+
+# 🔥 Sessions et données utilisateur
+session*
+*.session
+*.session-*
+*-auth-info.json
+*-tokens.json
+
+# 📦 Dépendances et builds
+node_modules/
+dist/
+build/
+*.exe
+*.bin
+
+# 📁 Dossiers générés
+downloads/
+media/
+temp/
+cache/
+logs/
+*.log*
+
+# 🗄️ Base de données locale
+*.db
+*.sqlite
+*.sqlite3
+
+# 🧪 Fichiers de test
+test/
+__tests__/
+*.spec.js
+*.test.js
+
+# 💻 Environnements de développement
+.idea/
+.vscode/
+*.code-workspace
+*.iml
+
+# 📦 Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 🔐 Fichiers chiffrés
+*.enc
+*.gpg
+*.pgp
+
+# 🗑️ Autres fichiers à ignorer
+*.tmp
+*.bak
+*.swp
+*~
