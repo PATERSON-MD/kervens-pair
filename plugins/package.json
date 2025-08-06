@@ -1,0 +1,18 @@
+// plugins/💬️/package.json
+{
+  "name": "paterson-md-core",
+  "version": "3.6.0",
+  "description": "Module principal du bot WhatsApp PATERSON-MD",
+  "main": "main.js",
+  "type": "module",
+  "dependencies": {
+    "@openai/api": "^4.0.0",
+    "whatsapp-web.js": "^1.24.0",
+    "qrcode-terminal": "^0.12.0",
+    "crypto-js": "^4.1.1"
+  },
+  "patersonConfig": {
+    "category": "core",
+    "priority": 1000
+  }
+}
