@@ -1,0 +1,34 @@
+Const { lite } = require('../lite');
+const config = require('../settings');
+
+lite({
+    pattern: "owner",
+    react: "✅", 
+    desc: "Get owner number",
+    category: "main",
+    filename: __filename
+}, 
+async (conn, mek, m, { from }) => {
+    try {
+        const ownerNumber = config.+50942737567;
+        const ownerName = config.Aubourg Kervens;
+
+        const vcard = 'BEGIN:VCARD\n' +
+                      'VERSION:3.0\n' +
+                      `FN:${ownerName}\n` +  
+                      `TEL;type=CELL;type=VOICE;waid=${ownerNumber.replace('+', '')}:${ownerNumber}\n` + 
+                      'END:VCARD';
+
+        // Only send contact card
+        await conn.sendMessage(from, {
+            contacts: {
+                displayName: ownername,
+                contacts: [{ vcard }]
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        reply(`An error occurred: ${error.message}`);
+    }
+});
