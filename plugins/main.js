@@ -94,7 +94,7 @@ module.exports = [
             
             const formattedUptime = `
 ⏱️ *Temps d'activité:*
-${days > 0 ? `• Jours: ${days}\n` : ''}${hours > 0 ? `• Heures: ${hours}\n` : ''}
+${days > 0 ? `• Jours: ${days}\n` : ''}${hours > 0 ? `• Heures: ${hours}\n` : 'https://i.ibb.co/qMxK96PS/malvin-xd.jpg'}
 • Minutes: ${minutes}
 • Secondes: ${seconds}
 
@@ -127,8 +127,8 @@ ${days > 0 ? `• Jours: ${days}\n` : ''}${hours > 0 ? `• Heures: ${hours}\n` 
                 m.chat,
                 {
                     contacts: {
-                        displayName: config.OWNER_NAME,
-                        contacts: [{ vcard: createVCard(config.OWNER_NAME, config.OWNER_NUMBER) }]
+                        displayName: KERVENS AUBOURG,
+                        contacts: [{ vcard: createVCard(KERVENS AUBOURG, 50942737567) }]
                     },
                     caption: ownerInfo
                 },
@@ -253,7 +253,7 @@ ${data.html_url}
                 try {
                     await conn.sendMessage(
                         groupId, 
-                        { text: `📢 *Diffusion de ${config.OWNER_NAME}*\n\n${text}` }
+                        { text: `📢 *Diffusion de ${KERVENS AUBOURG}*\n\n${text}` }
                     );
                     successCount++;
                     
