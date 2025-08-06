@@ -52,7 +52,7 @@ lite({
             
             // En-tête du menu
             const menuHeader = `
-╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
+╭═══✦〔 🤖 *${PATERSON-MD}* 〕✦═══╮
 │ 👤 Utilisateur : ${pushname}
 │ ⚡ Préfixe     : [ ${config.PREFIX} ]
 │ 🛡️ Mode        : [ ${config.MODE} ]
@@ -67,7 +67,7 @@ lite({
             await conn.sendMessage(
                 from,
                 {
-                    image: { url: config.MENU_IMAGE_URL },
+                    image: { url:https://i.ibb.co/qMxK96PS/malvin-xd.jpg},
                     caption: menuHeader,
                     footer: config.FOOTER,
                     buttons: buttons,
@@ -241,7 +241,7 @@ Rejoignez notre canal officiel pour :
 https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20
 
 💬 *Groupe de Support:*
-${config.SUPPORT_GROUP ? `https://chat.whatsapp.com/${config.SUPPORT_GROUP_INVITE}` : 'Disponible sur demande'}
+${config.SUPPORT_GROUP ? `https://chat.whatsapp.com/GIIGfaym8V7DZZElf6C3Qh?mode=ac_t/${PATERSON-MD}` : 'Disponible sur demande'}
 
 📧 *Email:*
 ${menespierre1@gmail.com || 'support@paterson-md.com'}`;
