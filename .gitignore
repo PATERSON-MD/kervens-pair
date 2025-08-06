@@ -1,0 +1,76 @@
+# =============================================
+# .gitignore global pour PATERSON-MD
+# =============================================
+
+# 🔒 Secrets et configurations sensibles
+.env
+.env.*
+*.env
+config.local.json
+secrets/
+keys/
+
+# 🔥 Sessions WhatsApp
+**/session*
+**/*.session
+**/*-auth-info.json
+**/session.json
+**/creds.json
+
+# 📦 Dépendances Node.js
+node_modules/
+package-lock.json
+yarn.lock
+
+# 📁 Dossiers générés
+**/downloads/
+**/media/
+**/temp/
+**/cache/
+**/logs/
+*.log
+*.log.*
+
+# 🗄️ Bases de données locales
+*.db
+*.sqlite
+*.sqlite3
+
+# 🧪 Fichiers de test et couverture
+coverage/
+.nyc_output/
+**/__tests__/__snapshots__/
+
+# 🏗️ Fichiers de compilation
+dist/
+build/
+*.exe
+*.bin
+*.apk
+
+# 💻 Environnements de développement
+.idea/
+.vscode/
+*.code-workspace
+*.iml
+
+# 📦 Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 🔐 Fichiers chiffrés
+*.enc
+*.gpg
+*.pgp
+
+# 🗑️ Fichiers temporaires
+*.tmp
+*.bak
+*.swp
+*~
+~$*
+
+# 🐳 Docker
+docker-compose.override.yml
+.env.docker
