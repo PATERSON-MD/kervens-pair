@@ -84,25 +84,65 @@ ${menuContent[category]}
 ╭═══✦〔 🎲 *JEUX DISPONIBLES* 〕✦═══╮
 │ 
 │ .actionverite - Jeu Action ou Vérité
-│ .quiz         - Quiz interactif
-│ .devinette    - Devine le nombre
-│ 
+const fs = require('fs');
+const config = require('../settings');
+const { lite, commands } = require('../lite');
+
+lite({
+    pattern: "menu",
+    react: "🔥",
+    alias: ["allmenu", "cmd"],
+    desc: "Affiche le menu interactif avec boutons",
+    category: "main",
+    filename: __filename
+},
+async (conn, mek, m, {
+    from, quoted, pushname, reply
+}) => {
+    try {
+        // Calcul de l'uptime
+        const uptime = process.uptime();
+        const days = Math.floor(uptime / (3600 * 24));
+        const hours = Math.floor((uptime % (3600 * 24)) / 3600);
+        const minutes = Math.floor((uptime % 3600) / 60);
+        const formattedUptime = `${days}j ${hours}h ${minutes}m`;
+        
+        // Boutons interactifs
+        const buttons = [
+            { buttonId: 'group', buttonText: { displayText: '👥 GROUP' }, type: 1 },
+            { buttonId: 'download', buttonText: { displayText: '📥 DOWNLOAD' }, type: 1 },
+            { buttonId: 'fun', buttonText: { displayText: '🎮 FUN' }, type: 1 },
+            { buttonId: 'owner', buttonText: { displayText: '👑 OWNER' }, type: 1 },
+            { buttonId: 'ai', buttonText: { displayText: '🧠 AI' }, type: 1 },
+            { buttonId: 'tools', buttonText: { displayText: '🛠️ TOOLS' }, type: 1 },
+            { buttonId: 'media', buttonText: { displayText: '🎵 MEDIA' }, type: 1 },
+            { buttonId: 'bug', buttonText: { displayText: '🐞 BUG GROUP' }, type: 1 },
+            { buttonId: 'games', buttonText: { displayText: '🎲 JEUX' }, type: 1 },
+            { buttonId: 'fullmenu', buttonText: { displayText: '📜 MENU COMPLET' }, type: 1 }
+        ];
+
+        // En-tête du menu
+        const menuHeader = `
+╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
+│ 👤 Utilisateur : ${pushname}
+│ ⚡ Préfixe     : [ ${config.PREFIX} ]
+│ 🛡️ Mode        : [ ${config.MODE} ]
+│ 🔄 Uptime      : ${formattedUptime}
+│ 🚀 Version     : ${config.version} BETA
 ╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯
 
-> ${config.DESCRIPTION || "Bot PATERSON-MD créé par KERVENS AUBOURG"}
-© ${new Date().getFullYear()} PATERSON-MD | Tous droits réservés`;
+📚 *SÉLECTIONNEZ UNE CATÉGORIE:*
+`;
 
-        // Envoi du menu avec image
+        // Envoi du menu avec boutons
         await conn.sendMessage(
             from,
             {
-                image: { url: config.MENU_IMAGE_URL || 'https://i.ibb.co/pXL9RYv/temp-image.jpg' },
-                caption: madeMenu,
-                contextInfo: {
-                    mentionedJid: [m.sender],
-                    forwardingScore: 999,
-                    isForwarded: true
-                }
+                image: { url: 'https://i.ibb.co/Mx4v92Dr/malvin-xd.jpg' },
+                caption: menuHeader,
+                footer: '© PATERSON-MD | Cliquez sur les boutons',
+                buttons: buttons,
+                headerType: 4
             },
             { quoted: mek }
         );
@@ -110,5 +150,51 @@ ${menuContent[category]}
     } catch (e) {
         console.error('Erreur du menu:', e);
         reply(`❌ Erreur lors du chargement du menu: ${e.message}`);
+    }
+});
+
+// Nouvelle commande pour gérer les interactions des boutons
+lite({
+    pattern: "menucategory",
+    dontAddCommandList: true,
+    fromMe: true,
+    desc: "Gestionnaire de catégories du menu",
+    filename: __filename
+},
+async (conn, mek, m, { reply, from }) => {
+    try {
+        const category = m.text.split(' ')[1];
+        const categories = {
+            'group': '👥 COMMANDES GROUPE',
+            'download': '📥 TÉLÉCHARGEMENTS',
+            'fun': '🎮 DIVERTISSEMENT',
+            'owner': '👑 ADMINISTRATION',
+            'ai': '🧠 INTELLIGENCE ARTIFICIELLE',
+            'bug': '🐞 BUG GROUP',
+            'tools': '🛠️ OUTILS',
+            'media': '🎵 MÉDIA',
+            'games': '🎲 JEUX'
+        };
+
+        if (!category || !categories[category]) {
+            return reply("❌ Catégorie invalide !");
+        }
+
+        let commandList = `╭═══✦〔 ${categories[category]} 〕✦═══╮\n`;
+        
+        commands.forEach(cmd => {
+            if (cmd.category === category && !cmd.dontAddCommandList) {
+                commandList += `│ ⬡ ${cmd.pattern}\n`;
+            }
+        });
+
+        commandList += `╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯\n\n` +
+                      `_Tapez *${config.PREFIX}menu* pour revenir au menu principal_`;
+
+        await reply(commandList);
+
+    } catch (e) {
+        console.error('Erreur de catégorie:', e);
+        reply(`❌ Erreur: ${e.message}`);
     }
 });
