@@ -75,8 +75,8 @@ module.exports = {
   //  PARAMÈTRES API
   // ===================
   API_KEYS: {
-    OPENAI: process.env.OPENAI_API_KEY || "votre_cle_api_openai",
-    GOOGLE: process.env.GOOGLE_API_KEY || "votre_cle_api_google",
+    OPENAI: process.env.OPENAI_API_KEY || "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",
+    DEPSEEK: process.env.DEPSEEK_API_KEY || "votre_cle_api_google",
     // Ajouter d'autres clés API au besoin
   },
   
