@@ -1,128 +1,57 @@
-const fs = require('fs');
+const { lite } = require('../lite');
 const config = require('../settings');
-const { lite, commands } = require('../lite');
+const commands = require('./commands'); // Importe toutes les commandes
+const moment = require('moment');
+const fs = require('fs');
+
+moment.locale('fr');
+
+// Catégories avec emojis et descriptions
+const CATEGORIES = {
+    'main': { emoji: '🏠', title: 'Commandes Principales' },
+    'group': { emoji: '👥', title: 'Gestion de Groupe' },
+    'download': { emoji: '📥', title: 'Téléchargements' },
+    'fun': { emoji: '🎮', title: 'Divertissement' },
+    'owner': { emoji: '👑', title: 'Administration' },
+    'ai': { emoji: '🧠', title: 'Intelligence Artificielle' },
+    'bug': { emoji: '🐞', title: 'Contrôles & Bugs' },
+    'tools': { emoji: '🛠️', title: 'Outils Utilitaires' },
+    'media': { emoji: '🎵', title: 'Médias & Stickers' },
+    'game': { emoji: '🎲', title: 'Jeux' }
+};
 
 lite({
     pattern: "menu",
-    react: "🔥",
-    alias: ["allmenu", "cmd"],
-    desc: "Affiche le menu complet avec contrôles de groupe",
+    react: "📜",
+    alias: ["help", "cmd", "command"],
+    desc: "Affiche le menu interactif",
     category: "main",
-    filename: __filename
-},
-async (conn, mek, m, {
-    from, quoted, pushname, reply
-}) => {
-    try {
-        // Calcul de l'uptime
-        const uptime = process.uptime();
-        const days = Math.floor(uptime / (3600 * 24));
-        const hours = Math.floor((uptime % (3600 * 24)) / 3600);
-        const minutes = Math.floor((uptime % 3600) / 60);
-        const formattedUptime = `${days}j ${hours}h ${minutes}m`;
-        
-        // Catégories améliorées
-        const categories = {
-            'group': '👥 COMMANDES GROUPE',
-            'download': '📥 TÉLÉCHARGEMENTS',
-            'fun': '🎮 DIVERTISSEMENT & JEUX',
-            'owner': '👑 ADMINISTRATION',
-            'ai': '🧠 INTELLIGENCE ARTIFICIELLE',
-            'bug': '🐞 BUG GROUP',
-            'tools': '🛠️ OUTILS',
-            'media': '🎵 MÉDIA'
-        };
-
-        // Génération du contenu des catégories
-        let menuContent = {};
-        for (const category in categories) {
-            menuContent[category] = '';
-        }
-
-        for (let cmd of commands) {
-            if (cmd.pattern && !cmd.dontAddCommandList && categories[cmd.category]) {
-                menuContent[cmd.category] += `│ ⬡ ${cmd.pattern}\n`;
-            }
-        }
-
-        // Construction du menu principal
-        let madeMenu = `
-╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
-│ 👤 Utilisateur : ${pushname}
-│ ⚡ Préfixe     : [ ${config.PREFIX} ]
-│ 🛡️ Mode        : [ ${config.MODE} ]
-│ 🔄 Uptime      : ${formattedUptime}
-│ 🚀 Version     : ${config.version} BETA
-╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯
-
-📚 *CATÉGORIES PRINCIPALES:*
-`;
-
-        // Ajout des catégories au menu
-        for (const [category, title] of Object.entries(categories)) {
-            if (menuContent[category]) {
-                madeMenu += `
-╭═══✦〔 ${title} 〕✦═══╮
-${menuContent[category]}
-╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯`;
-            }
-        }
-
-        // Section spéciale Bug Group
-        madeMenu += `
-
-╭═══✦〔 🚨 *BUG GROUP CONTROLS* 〕✦═══╮
-│ 
-│ .antipurge [on/off]  - Bloquer les purges
-│ .purge                - Purger les messages
-│ .lockgroup            - Verrouiller le groupe
-│ .unlockgroup          - Déverrouiller
-│ .restrict [all/none]  - Restrictions
-│ 
-╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯
-
-╭═══✦〔 🎲 *JEUX DISPONIBLES* 〕✦═══╮
-│ 
-│ .actionverite - Jeu Action ou Vérité
-const fs = require('fs');
-const config = require('../settings');
-const { lite, commands } = require('../lite');
-
-lite({
-    pattern: "menu",
-    react: "🔥",
-    alias: ["allmenu", "cmd"],
-    desc: "Affiche le menu interactif avec boutons",
-    category: "main",
-    filename: __filename
-},
-async (conn, mek, m, {
-    from, quoted, pushname, reply
-}) => {
-    try {
-        // Calcul de l'uptime
-        const uptime = process.uptime();
-        const days = Math.floor(uptime / (3600 * 24));
-        const hours = Math.floor((uptime % (3600 * 24)) / 3600);
-        const minutes = Math.floor((uptime % 3600) / 60);
-        const formattedUptime = `${days}j ${hours}h ${minutes}m`;
-        
-        // Boutons interactifs
-        const buttons = [
-            { buttonId: 'group', buttonText: { displayText: '👥 GROUP' }, type: 1 },
-            { buttonId: 'download', buttonText: { displayText: '📥 DOWNLOAD' }, type: 1 },
-            { buttonId: 'fun', buttonText: { displayText: '🎮 FUN' }, type: 1 },
-            { buttonId: 'owner', buttonText: { displayText: '👑 OWNER' }, type: 1 },
-            { buttonId: 'ai', buttonText: { displayText: '🧠 AI' }, type: 1 },
-            { buttonId: 'tools', buttonText: { displayText: '🛠️ TOOLS' }, type: 1 },
-            { buttonId: 'media', buttonText: { displayText: '🎵 MEDIA' }, type: 1 },
-            { buttonId: 'bug', buttonText: { displayText: '🐞 BUG GROUP' }, type: 1 },
-            { buttonId: 'games', buttonText: { displayText: '🎲 JEUX' }, type: 1 },
-            { buttonId: 'fullmenu', buttonText: { displayText: '📜 MENU COMPLET' }, type: 1 }
-        ];
-
-        // En-tête du menu
-        const menuHeader = `
+    filename: __filename,
+    async handler(conn, mek, m, { reply, pushname, from }) {
+        try {
+            // Calcul de l'uptime
+            const uptime = process.uptime();
+            const days = Math.floor(uptime / (3600 * 24));
+            const hours = Math.floor((uptime % (3600 * 24)) / 3600);
+            const minutes = Math.floor((uptime % 3600) / 60);
+            const formattedUptime = `${days}j ${hours}h ${minutes}m`;
+            
+            // Boutons interactifs
+            const buttons = Object.entries(CATEGORIES).map(([category, { emoji, title }]) => {
+                return {
+                    buttonId: `menucategory ${category}`,
+                    buttonText: { displayText: `${emoji} ${title}` },
+                    type: 1
+                };
+            });
+            
+            buttons.push(
+                { buttonId: 'donate', buttonText: { displayText: '❤️ Faire un Don' }, type: 1 },
+                { buttonId: 'support', buttonText: { displayText: '👥 Support' }, type: 1 }
+            );
+            
+            // En-tête du menu
+            const menuHeader = `
 ╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
 │ 👤 Utilisateur : ${pushname}
 │ ⚡ Préfixe     : [ ${config.PREFIX} ]
@@ -134,67 +63,222 @@ async (conn, mek, m, {
 📚 *SÉLECTIONNEZ UNE CATÉGORIE:*
 `;
 
-        // Envoi du menu avec boutons
-        await conn.sendMessage(
-            from,
-            {
-                image: { url: 'https://i.ibb.co/Mx4v92Dr/malvin-xd.jpg' },
-                caption: menuHeader,
-                footer: '© PATERSON-MD | Cliquez sur les boutons',
-                buttons: buttons,
-                headerType: 4
-            },
-            { quoted: mek }
-        );
+            // Envoi du menu avec boutons
+            await conn.sendMessage(
+                from,
+                {
+                    image: { url: config.MENU_IMAGE_URL },
+                    caption: menuHeader,
+                    footer: config.FOOTER,
+                    buttons: buttons,
+                    headerType: 4
+                },
+                { quoted: mek }
+            );
 
-    } catch (e) {
-        console.error('Erreur du menu:', e);
-        reply(`❌ Erreur lors du chargement du menu: ${e.message}`);
+        } catch (e) {
+            console.error('Erreur du menu:', e);
+            reply(`❌ Erreur lors du chargement du menu: ${e.message}`);
+        }
     }
 });
 
-// Nouvelle commande pour gérer les interactions des boutons
+// Commande pour afficher les commandes par catégorie
 lite({
     pattern: "menucategory",
+    react: "📚",
     dontAddCommandList: true,
-    fromMe: true,
-    desc: "Gestionnaire de catégories du menu",
-    filename: __filename
-},
-async (conn, mek, m, { reply, from }) => {
-    try {
-        const category = m.text.split(' ')[1];
-        const categories = {
-            'group': '👥 COMMANDES GROUPE',
-            'download': '📥 TÉLÉCHARGEMENTS',
-            'fun': '🎮 DIVERTISSEMENT',
-            'owner': '👑 ADMINISTRATION',
-            'ai': '🧠 INTELLIGENCE ARTIFICIELLE',
-            'bug': '🐞 BUG GROUP',
-            'tools': '🛠️ OUTILS',
-            'media': '🎵 MÉDIA',
-            'games': '🎲 JEUX'
-        };
-
-        if (!category || !categories[category]) {
-            return reply("❌ Catégorie invalide !");
-        }
-
-        let commandList = `╭═══✦〔 ${categories[category]} 〕✦═══╮\n`;
-        
-        commands.forEach(cmd => {
-            if (cmd.category === category && !cmd.dontAddCommandList) {
-                commandList += `│ ⬡ ${cmd.pattern}\n`;
+    desc: "Affiche les commandes d'une catégorie",
+    filename: __filename,
+    async handler(conn, mek, m, { reply, text, from }) {
+        try {
+            const category = text.split(' ')[1];
+            
+            if (!category || !CATEGORIES[category]) {
+                return reply("❌ Catégorie invalide! Utilisez .menu pour voir les catégories");
             }
-        });
+            
+            const { emoji, title } = CATEGORIES[category];
+            const categoryCommands = commands.filter(cmd => 
+                cmd.category === category && !cmd.dontAddCommandList
+            );
+            
+            if (categoryCommands.length === 0) {
+                return reply(`❌ Aucune commande dans la catégorie ${title}`);
+            }
+            
+            let commandList = `╭═══✦〔 ${emoji} *${title}* 〕✦═══╮\n`;
+            categoryCommands.forEach((cmd, index) => {
+                commandList += `│ ⬡ ${config.PREFIX}${cmd.pattern}${cmd.alias ? ` (${cmd.alias.join(', ')})` : ''}\n`;
+                if ((index + 1) % 5 === 0 && index !== categoryCommands.length - 1) {
+                    commandList += '╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯\n╭═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╮\n';
+                }
+            });
+            
+            commandList += `╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯\n\n` +
+                          `_Tapez *${config.PREFIX}menu* pour revenir au menu principal_`;
+            
+            await reply(commandList);
+            
+        } catch (e) {
+            console.error('Erreur de catégorie:', e);
+            reply(`❌ Erreur: ${e.message}`);
+        }
+    }
+});
 
-        commandList += `╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯\n\n` +
-                      `_Tapez *${config.PREFIX}menu* pour revenir au menu principal_`;
+// Commande pour afficher toutes les commandes
+lite({
+    pattern: "allmenu",
+    react: "📜",
+    alias: ["fullmenu", "allcmd"],
+    desc: "Affiche toutes les commandes disponibles",
+    category: "main",
+    filename: __filename,
+    async handler(conn, mek, m, { reply, pushname }) {
+        try {
+            // Calcul de l'uptime
+            const uptime = process.uptime();
+            const days = Math.floor(uptime / (3600 * 24));
+            const hours = Math.floor((uptime % (3600 * 24)) / 3600);
+            const minutes = Math.floor((uptime % 3600) / 60);
+            const formattedUptime = `${days}j ${hours}h ${minutes}m`;
+            
+            // Générer le contenu du menu par catégorie
+            let menuContent = "";
+            
+            for (const [category, { emoji, title }] of Object.entries(CATEGORIES)) {
+                const categoryCommands = commands.filter(cmd => 
+                    cmd.category === category && !cmd.dontAddCommandList
+                );
+                
+                if (categoryCommands.length > 0) {
+                    menuContent += `\n╭═══✦〔 ${emoji} *${title}* 〕✦═══╮\n`;
+                    
+                    categoryCommands.forEach(cmd => {
+                        menuContent += `│ ⬡ ${config.PREFIX}${cmd.pattern}`;
+                        if (cmd.alias) menuContent += ` (${cmd.alias.join(', ')})`;
+                        menuContent += `\n`;
+                    });
+                    
+                    menuContent += `╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯`;
+                }
+            }
+            
+            // Menu complet
+            const fullMenu = `
+╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
+│ 👤 Utilisateur : ${pushname}
+│ ⚡ Préfixe     : [ ${config.PREFIX} ]
+│ 🛡️ Mode        : [ ${config.MODE} ]
+│ 🔄 Uptime      : ${formattedUptime}
+│ 🚀 Version     : ${config.version} BETA
+╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯
 
-        await reply(commandList);
+📚 *TOUTES LES COMMANDES DISPONIBLES:*
+${menuContent}
 
-    } catch (e) {
-        console.error('Erreur de catégorie:', e);
-        reply(`❌ Erreur: ${e.message}`);
+🔍 *COMMANDES SPÉCIALES:*
+╭═══✦〔 🐞 BUG GROUP CONTROLS 〕✦═══╮
+│ .antipurge [on/off] - Bloquer les purges
+│ .purge - Purger les messages
+│ .lockgroup - Verrouiller le groupe
+│ .unlockgroup - Déverrouiller
+│ .restrict [all/none] - Restrictions
+╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯
+
+╭═══✦〔 🎲 JEUX DISPONIBLES 〕✦═══╮
+│ .tictactoe - Jeu du Morpion
+│ .hangman - Jeu du Pendu
+│ .quiz - Quiz interactif
+│ .actionverite - Action ou Vérité
+╰═══✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦✧✦═══╯
+
+> ${config.DESCRIPTION || "Bot PATERSON-MD créé par KERVENS AUBOURG"}
+© ${new Date().getFullYear()} PATERSON-MD | Tous droits réservés
+${config.FOOTER || ""}`;
+
+            // Envoi du menu complet
+            await conn.sendMessage(
+                from,
+                {
+                    image: { url: config.MENU_IMAGE_URL },
+                    caption: fullMenu,
+                    contextInfo: {
+                        mentionedJid: [m.sender],
+                        forwardingScore: 999,
+                        isForwarded: true
+                    }
+                },
+                { quoted: mek }
+            );
+
+        } catch (e) {
+            console.error('Erreur du menu complet:', e);
+            reply(`❌ Erreur lors du chargement du menu complet: ${e.message}`);
+        }
+    }
+});
+
+// Commande pour afficher les informations de support
+lite({
+    pattern: "support",
+    react: "👥",
+    dontAddCommandList: true,
+    desc: "Affiche les informations de support",
+    filename: __filename,
+    async handler(conn, mek, m, { reply }) {
+        const supportInfo = `
+👥 *SUPPORT & COMMUNAUTÉ*
+
+Rejoignez notre canal officiel pour :
+- Annonces importantes
+- Mises à jour du bot
+- Support technique
+- Communauté active
+
+🌐 *Canal Officiel:*
+https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20
+
+💬 *Groupe de Support:*
+${config.SUPPORT_GROUP ? `https://chat.whatsapp.com/${config.SUPPORT_GROUP_INVITE}` : 'Disponible sur demande'}
+
+📧 *Email:*
+${menespierre1@gmail.com || 'support@paterson-md.com'}`;
+        
+        await reply(supportInfo);
+    }
+});
+
+// Commande pour afficher les informations de don
+lite({
+    pattern: "donate",
+    react: "❤️",
+    dontAddCommandList: true,
+    desc: "Affiche les informations pour faire un don",
+    filename: __filename,
+    async handler(conn, mek, m, { reply }) {
+        const donationInfo = `
+❤️ *SOUTENIR LE DÉVELOPPEMENT DU BOT*
+
+Merci de vouloir soutenir ${PATERSON-MD}et la communauté Haïtienne!
+
+Vos dons nous aident à:
+- Maintenir les serveurs du bot
+- Développer de nouvelles fonctionnalités
+- Fournir un support rapide
+- Soutenir des initiatives locales en Haïti
+
+💳 *Dons pour Haïti:*
+• NATCASH: 50935399104
+• MON CASH: 50946343554
+
+🌍 *Dons Internationaux:*
+• PayPal: ${menespierre1@gmail.com || 'paypal.me/PatersonMD'}
+
+Votre soutien est grandement apprécié! 🙏
+🇭🇹 Ensemble pour une Haïti meilleur`;
+        
+        await reply(donationInfo);
     }
 });
