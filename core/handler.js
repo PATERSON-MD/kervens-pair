@@ -1,30 +1,14 @@
 // plugins/💬️/core/handler.js
-const path = require('path');
-const fs = require('fs');
+const CommandLoader = require('./loader');
 const config = require('../settings');
 
 class CommandHandler {
     constructor() {
-        this.commands = new Map();
-        this.aliases = new Map();
+        this.loader = new CommandLoader(path.join(__dirname, '../commands'));
     }
 
-    async loadCommands() {
-        const commandsPath = path.join(__dirname, '../commands');
-        const commandFiles = fs.readdirSync(commandsPath)
-            .filter(file => file.endsWith('.js'));
-
-        for (const file of commandFiles) {
-            const command = require(path.join(commandsPath, file));
-            this.commands.set(command.name, command);
-            
-            if (command.aliases) {
-                command.aliases.forEach(alias => {
-                    this.aliases.set(alias, command.name);
-                });
-            }
-        }
-        console.log(`✅ Chargé ${this.commands.size} commandes avec ${this.aliases.size} alias`);
+    async initialize() {
+        this.loader.loadCommands();
     }
 
     async execute(message) {
@@ -34,9 +18,7 @@ class CommandHandler {
         const args = message.body.slice(prefix.length).trim().split(/ +/);
         const commandName = args.shift().toLowerCase();
 
-        const command = this.commands.get(commandName) || 
-                        this.commands.get(this.aliases.get(commandName));
-
+        const command = this.loader.getCommand(commandName);
         if (!command) return false;
 
         try {
