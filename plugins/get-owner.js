@@ -1,34 +1,48 @@
-Const { lite } = require('../lite');
+const { lite } = require('../lite');
 const config = require('../settings');
 
 lite({
     pattern: "owner",
     react: "✅", 
-    desc: "Get owner number",
+    desc: "Obtenir les coordonnées du propriétaire",
     category: "main",
     filename: __filename
 }, 
 async (conn, mek, m, { from }) => {
     try {
-        const ownerNumber = config.+50942737567;
-        const ownerName = config.Aubourg Kervens;
+        // Informations du propriétaire
+        const ownerNumber = "+50942737568";
+        const ownerName = "Aubourg Kervens";
+        
+        // Création de la vCard
+        const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${ownerName}
+ORG:${config.BOT_NAME || "PATERSON-MD"};
+TEL;type=CELL;type=VOICE;waid=${ownerNumber.replace('+', '')}:${ownerNumber}
+X-WA-BIZ-DESCRIPTION:Propriétaire du bot ${config.BOT_NAME || "PATERSON-MD"}
+END:VCARD`;
 
-        const vcard = 'BEGIN:VCARD\n' +
-                      'VERSION:3.0\n' +
-                      `FN:${ownerName}\n` +  
-                      `TEL;type=CELL;type=VOICE;waid=${ownerNumber.replace('+', '')}:${ownerNumber}\n` + 
-                      'END:VCARD';
-
-        // Only send contact card
+        // Envoi de la carte de contact
         await conn.sendMessage(from, {
             contacts: {
-                displayName: ownername,
+                displayName: ownerName,
                 contacts: [{ vcard }]
             }
-        });
+        }, { quoted: mek });
+
+        // Envoi d'un message supplémentaire (optionnel)
+        await conn.sendMessage(from, {
+            text: `👑 *Propriétaire du Bot*\n
+Nom: *${ownerName}*
+Numéro: *${ownerNumber}*
+Bot: *${config.BOT_NAME || "PATERSON-MD"}*`
+        }, { quoted: mek });
 
     } catch (error) {
-        console.error(error);
-        reply(`An error occurred: ${error.message}`);
+        console.error("Erreur commande owner:", error);
+        await conn.sendMessage(from, { 
+            text: `❌ Erreur lors de la récupération des coordonnées: ${error.message}` 
+        }, { quoted: mek });
     }
 });
