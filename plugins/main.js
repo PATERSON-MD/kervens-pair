@@ -35,7 +35,7 @@ module.exports = [
             ];
 
             const menuHeader = `
-╭═══✦〔 🤖 *${config.BOT_NAME}* 〕✦═══╮
+╭═══✦〔 🤖 *${PATERSON-MD}* 〕✦═══╮
 │ 👤 Utilisateur : ${pushname}
 │ ⚡ Préfixe     : [ ${config.PREFIX} ]
 │ 🛡️ Mode        : [ ${config.MODE} ]
@@ -49,7 +49,7 @@ module.exports = [
             await conn.sendMessage(
                 m.chat,
                 {
-                    image: { url: config.MENU_IMAGE_URL },
+                    image: { url . },
                     caption: menuHeader,
                     footer: config.FOOTER,
                     buttons: buttons,
@@ -115,9 +115,9 @@ ${days > 0 ? `• Jours: ${days}\n` : ''}${hours > 0 ? `• Heures: ${hours}\n` 
             const ownerInfo = `
 👑 *PROPRIÉTAIRE DU BOT*
 
-• Nom: ${config.OWNER_NAME}
-• Contact: wa.me/${config.OWNER_NUMBER.replace('@s.whatsapp.net', '')}
-• Équipe: ${config.TEAM_NAME || "PATERSON-MD"}
+• Nom: ${KERVENS AUBOURG}
+• Contact: wa.me/${50942737567.replace('@s.whatsapp.net', '')}
+• Équipe: ${BLACK || "PATERSON-MD"}
 
 📌 *Pour les demandes sérieuses uniquement*
 ⚠️ Les abusers seront bloqués automatiquement
@@ -147,10 +147,10 @@ ${days > 0 ? `• Jours: ${days}\n` : ''}${hours > 0 ? `• Heures: ${hours}\n` 
             const depCount = Object.keys(packageInfo.dependencies || {}).length;
             
             const botInfo = `
-🤖 *INFORMATIONS SUR ${config.BOT_NAME.toUpperCase()}*
+🤖 *INFORMATIONS SUR ${PATERSON-MD.toUpperCase()}*
 
 • Version: ${config.version} (${packageInfo.version})
-• Développeur: ${config.OWNER_NAME}
+• Développeur: ${KERVENS AUBOURG}
 • Langage: Node.js ${process.version}
 • Bibliothèque: Baileys v${packageInfo.dependencies['@adiwajshing/baileys']?.replace('^', '') || 'inconnue'}
 • Modules: ${depCount} dépendances
