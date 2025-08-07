@@ -28,7 +28,7 @@
   "author": "Kervens Aubourg",
   "license": "MIT",
   "dependencies": {
-    "@openai/api": "^4.0.0",
+    "openai/api": "^4.0.0",
     "@whiskeysockets/baileys": "^6.7.17",
     "async-mutex": "^0.4.1",
     "awesome-phonenumber": "^2.64.0",
