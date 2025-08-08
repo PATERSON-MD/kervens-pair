@@ -138,31 +138,53 @@ if (isProduction && cluster.isMaster) {
     res.status(404).sendFile(path.join(__path, 'public', '404.html'));
   });
 
-  // Démarrage du serveur
-  const server = app.listen(PORT, '0.0.0.0', () => {
-    const address = server.address();
-    logger.info(`
-  ╔══════════════════════════════════════╗
-  ║                                      ║
-  ║   PATERSON-MD Running on port ${PORT}   ║
-  ║                                      ║
-  ║   ➜ http://localhost:${PORT}         ║
-  ║                                      ║
-  ╚══════════════════════════════════════╝
-  
-  GitHub: https://github.com/PATERSON-MD/PATERSON-MD
-  WhatsApp Channel: https://whatsapp.com/channel/0029Vb6KikfLdQefJursHm20
-  `);
-  });
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import helmet from 'helmet';
+import compression from 'compression';
+import cluster from 'cluster';
+import os from 'os';
+import logger from './utils/logger.js';
+import { makeid } from './utils/gen-id.js';
 
-  // Gestion des erreurs non capturées
-  process.on('uncaughtException', (err) => {
-    logger.error(`Uncaught Exception: ${err.message}`, err);
-    process.exit(1);
-  });
+// Configuration des chemins
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const __path = __dirname;
 
-  process.on('unhandledRejection', (reason, promise) => {
-    logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
-    process.exit(1);
+const app = express();
+const PORT = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Configuration du clustering
+if (isProduction && cluster.isPrimary) {  // Note: 'isPrimary' au lieu de 'isMaster'
+  logger.info(`Primary ${process.pid} is running`);
+
+  const numCPUs = os.cpus().length;
+  for (let i = 0; i < Math.min(numCPUs, 4); i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    logger.warn(`Worker ${worker.process.pid} died. Restarting...`);
+    cluster.fork();
   });
-      }
+} else {
+  // Middlewares
+  app.use(helmet());
+  app.use(compression());
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.static(path.join(__path, 'public')));
+
+  // Augmentation limite des écouteurs
+  import { default as events } from 'events';
+  events.EventEmitter.defaultMaxListeners = 100;
+
+  // [...] (le reste du code reste identique)
+                           }
