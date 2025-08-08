@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
+// Configuration des chemins
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logDir = path.join(__dirname, '../logs');
@@ -13,7 +14,7 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
-// Format personnalisé avec timestamp et couleur
+// Format personnalisé avec timestamp
 const logFormat = winston.format.printf(
   ({ level, message, timestamp, stack }) => {
     let log = `${timestamp} [${level}]: ${message}`;
@@ -24,7 +25,7 @@ const logFormat = winston.format.printf(
   }
 );
 
-// Configuration du logger
+// Configuration du logger principal
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -73,16 +74,13 @@ const logger = winston.createLogger({
 });
 
 // Proxy pour les messages de démarrage
-const originalInfo = logger.info;
+const originalInfo = logger.info.bind(logger);
 logger.info = (message) => {
-  if (message.includes('PATERSON-MD')) {
+  if (typeof message === 'string' && message.includes('PATERSON-MD')) {
     // Formattage spécial pour le message de démarrage
-    return originalInfo.call(
-      logger, 
-      '\n' + message.replace(/║/g, '║\n') + '\n'
-    );
+    return originalInfo('\n' + message + '\n');
   }
-  return originalInfo.call(logger, message);
+  return originalInfo(message);
 };
 
 // Logger pour les requêtes HTTP
