@@ -1,19 +1,20 @@
+cat > scripts/postinstall.js << 'EOF'
 #!/usr/bin/env node
-// scripts/postinstall.js
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const fs = require('fs');
-const path = require('path');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 try {
   console.log('✅ Début du script postinstall');
   
-  // 1. Vérification des variables d'environnement
   const envPath = path.join(__dirname, '..', '.env');
   if (!fs.existsSync(envPath)) {
     console.warn('⚠️ Fichier .env non trouvé. Créez-en un basé sur .env.example');
   }
 
-  // 2. Message de succès
   console.log('✨ Script postinstall exécuté avec succès');
   process.exit(0);
   
@@ -21,3 +22,4 @@ try {
   console.error('❌ Erreur dans postinstall:', error.message);
   process.exit(1);
 }
+EOF
