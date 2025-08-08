@@ -1,16 +1,17 @@
-const { makeid } = require('../gen-id'); 
-const express = require('express');
-const QRCode = require('qrcode');
-const fs = require('fs');
-const router = express.Router();
-const pino = require("pino");
-const { 
-  default: makeWASocket,
+import { makeid } from '../gen-id.js';
+import express from 'express';
+import QRCode from 'qrcode';
+import fs from 'fs';
+import pino from 'pino';
+import { 
+  default as makeWASocket,
   useMultiFileAuthState,
   delay,
   Browsers
-} = require("@whiskeysockets/baileys");
-const { upload } = require('../mega');
+} from "@whiskeysockets/baileys";
+import { upload } from '../mega.js';
+
+const router = express.Router();
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
@@ -53,7 +54,10 @@ router.get('/', async (req, res) => {
 
                 if (connection === "open") {
                     try {
-                        const credsPath = `${__dirname}/temp/${id}/creds.json`;
+                        // Utilisation de import.meta.url pour __dirname
+                        const currentDir = new URL('.', import.meta.url).pathname;
+                        const credsPath = `${currentDir}temp/${id}/creds.json`;
+                        
                         const megaUrl = await upload(fs.createReadStream(credsPath), `${sock.user.id}.json`);
                         const sessionCode = `paterson~${megaUrl.replace('https://mega.nz/file/', '')}`;
 
@@ -98,4 +102,4 @@ router.get('/', async (req, res) => {
     await PATERSON_MD_PAIR_CODE();
 });
 
-module.exports = router;
+export default router;
