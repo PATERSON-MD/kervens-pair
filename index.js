@@ -1,17 +1,23 @@
-require('dotenv').config(); // Charger les variables d'environnement
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const helmet = require('helmet'); // Sécurisation des en-têtes
-const compression = require('compression'); // Compression des réponses
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-const logger = require('./utils/logger'); // Logger personnalisé
-const { makeid } = require('./utils/gen-id'); // Déplacé dans un dossier utils
+import dotenv from 'dotenv';
+dotenv.config(); // Charger les variables d'environnement
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import helmet from 'helmet'; // Sécurisation des en-têtes
+import compression from 'compression'; // Compression des réponses
+import cluster from 'cluster';
+import os from 'os';
+import logger from './utils/logger.js'; // Logger personnalisé
+import { makeid } from './utils/gen-id.js'; // Déplacé dans un dossier utils
+
+// Configuration des chemins pour ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const __path = __dirname;
 
 const app = express();
-const __path = __dirname;
 const PORT = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -20,6 +26,7 @@ if (isProduction && cluster.isMaster) {
   logger.info(`Master ${process.pid} is running`);
 
   // Fork workers
+  const numCPUs = os.cpus().length;
   for (let i = 0; i < Math.min(numCPUs, 4); i++) { // Max 4 workers
     cluster.fork();
   }
@@ -37,7 +44,8 @@ if (isProduction && cluster.isMaster) {
   app.use(express.static(path.join(__path, 'public')));
 
   // Augmentation limite des écouteurs
-  require('events').EventEmitter.defaultMaxListeners = 100;
+  import EventEmitter from 'events';
+  EventEmitter.defaultMaxListeners = 100;
 
   // Vérification des fichiers critiques
   logger.info("Vérification des fichiers...");
@@ -89,11 +97,13 @@ if (isProduction && cluster.isMaster) {
   // Chargement des routes
   try {
     logger.info("Chargement des routes...");
-    const qrRouter = require('./routes/qr');
-    const pairRouter = require('./routes/pair');
     
-    app.use('/server', qrRouter);
-    app.use('/code', pairRouter);
+    // Import dynamique pour les routes
+    const qrModule = await import('./routes/qr.js');
+    const pairModule = await import('./routes/pair.js');
+    
+    app.use('/server', qrModule.default);
+    app.use('/code', pairModule.default);
     logger.info("Routes chargées avec succès");
   } catch (e) {
     logger.error("Erreur de chargement des routes:", e);
@@ -155,4 +165,4 @@ if (isProduction && cluster.isMaster) {
     logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
     process.exit(1);
   });
-        }
+      }
