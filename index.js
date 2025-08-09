@@ -44,7 +44,7 @@ if (isProduction && cluster.isPrimary) {
 
   // Augmentation limite des écouteurs
   import { default as events } from 'events';
-  events.EventEmitter.defaultMaxListeners = 100;
+  EventsEventEmitter.defaultMaxListeners = 100;
 
   // Vérification des fichiers critiques
   logger.info("Vérification des fichiers...");
