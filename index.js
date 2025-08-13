@@ -1,8 +1,7 @@
-consoleconsole.log('Démarrage de l\'application...');
-console.log('Version Node:', process.version);
-console.log('Type de module:', import.meta.url ? 'ESM' : 'CommonJS');.log('Démarrage de l\'application...');
+console.log('Démarrage de l\'application...');
 console.log('Version Node:', process.version);
 console.log('Type de module:', import.meta.url ? 'ESM' : 'CommonJS');
+
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
@@ -47,9 +46,10 @@ if (isProduction && cluster.isPrimary) {
   app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
   app.use(express.static(path.join(__path, 'public')));
 
-  // Augmentation limite des écouteurs
-import { default as EventEmitter } from 'events';
-EventEmitter.defaultMaxListeners = 100;
+  // CORRECTION: Nouvelle syntaxe pour l'importation de events
+  const { default: EventEmitter } = await import('node:events');
+  EventEmitter.defaultMaxListeners = 100;
+
   // Vérification des fichiers critiques
   logger.info("Vérification des fichiers...");
   const requiredFiles = [
@@ -161,4 +161,4 @@ EventEmitter.defaultMaxListeners = 100;
     logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
     process.exit(1);
   });
-    }
+}
