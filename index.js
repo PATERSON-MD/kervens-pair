@@ -43,9 +43,8 @@ if (isProduction && cluster.isPrimary) {
   app.use(express.static(path.join(__path, 'public')));
 
   // Augmentation limite des écouteurs
-  import { default as events } from 'events';
-  EventsEventEmitter.defaultMaxListeners = 100;
-
+import { EventEmitter } from 'events';
+EventEmitter.defaultMaxListeners = 100;
   // Vérification des fichiers critiques
   logger.info("Vérification des fichiers...");
   const requiredFiles = [
