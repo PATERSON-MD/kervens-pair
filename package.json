@@ -1,19 +1,20 @@
 {
   "name": "paterson-md",
-  "version": "3.6.0",
+  "version": "3.6.1",
   "description": "Advanced WhatsApp Bot with AI capabilities, QR Pairing and Cloud Session Management",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "NODE_ENV=production node --no-warnings index.js",
+    "start": "NODE_ENV=production node --no-warnings=ExperimentalWarning --trace-warnings index.js",
     "stop": "pm2 stop PATERSON-MD",
     "restart": "pm2 restart PATERSON-MD",
-    "dev": "NODE_ENV=development nodemon index.js",
+    "dev": "NODE_ENV=development nodemon --experimental-specifier-resolution=node index.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --detectOpenHandles",
     "lint": "eslint . --fix",
     "health": "curl http://localhost:5000/health",
     "keygen": "node -e \"import('crypto').then(c => console.log(c.randomBytes(32).toString('hex')))\"",
-    "deploy": "npm run lint && npm test && pm2 startOrRestart ecosystem.config.js"
+    "deploy": "npm run lint && npm test && pm2 startOrRestart ecosystem.config.js",
+    "predeploy": "npm install --production && npm prune --production"
   },
   "keywords": [
     "whatsapp-bot",
@@ -33,10 +34,12 @@
     "awesome-phonenumber": "^2.64.0",
     "compression": "^1.7.4",
     "dotenv": "^16.3.1",
+    "events": "^3.3.0",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.3",
     "helmet": "^7.1.0",
     "megajs": "^1.1.7",
+    "node-fetch": "^3.3.2",
     "pino": "^8.14.1",
     "pino-pretty": "^10.2.0",
     "pm2": "^5.3.1",
@@ -53,7 +56,7 @@
     "supertest": "^6.3.3"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": "18.17.1",
     "npm": ">=9.0.0"
   },
   "repository": {
