@@ -1,3 +1,8 @@
+consoleconsole.log('Démarrage de l\'application...');
+console.log('Version Node:', process.version);
+console.log('Type de module:', import.meta.url ? 'ESM' : 'CommonJS');.log('Démarrage de l\'application...');
+console.log('Version Node:', process.version);
+console.log('Type de module:', import.meta.url ? 'ESM' : 'CommonJS');
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
