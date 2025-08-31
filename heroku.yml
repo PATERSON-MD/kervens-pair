@@ -1,19 +1,55 @@
+# Heroku configuration for PATERSON-MD WhatsApp Bot
+# Optimized for performance and reliability
+
 build:
   buildpacks:
     - heroku/nodejs
     - heroku-community/apt
-    - jontewks/puppeteer
+    - https://github.com/jontewks/puppeteer-heroku-buildpack
 
 run:
   web: npm start
+  worker: npm run worker
 
 setup:
   addons:
-    - plan: heroku-redis
+    - plan: heroku-redis:hobby-dev
       as: REDIS
+    - plan: mongolab:sandbox
+      as: MONGODB
 
 config:
   NODE_ENV: production
-  TZ: Africa/Harare
-  NPM_CONFIG_PRODUCTION: false
+  TZ: Africa/Port-au-Prince
+  NPM_CONFIG_PRODUCTION: true
   DISABLE_WEBSOCKETS: false
+  PORT: 5000
+  WEB_CONCURRENCY: 2
+  NODE_OPTIONS: --max_old_space_size=512
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+  PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+
+# Environment-specific configurations
+environments:
+  test:
+    config:
+      NODE_ENV: test
+      PORT: 5001
+  review:
+    config:
+      NODE_ENV: development
+      PORT: 5002
+
+# Release phase for running migrations/setup
+release:
+  image: heroku/nodejs
+  command:
+    - npm run migrate
+
+# Health check configuration
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
