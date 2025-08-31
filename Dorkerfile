@@ -1,56 +1,129 @@
-FROM node:lts-bullseye
+# =============================================
+# Dockerfile pour PATERSON-MD WhatsApp Bot
+# Image optimisée pour les performances et la sécurité
+# =============================================
 
-# Mise à jour et installation des dépendances système
+# Utilisation de Node.js LTS sur Debian slim pour une image plus légère
+FROM node:lts-bullseye-slim
+
+# Mise à jour et installation des dépendances système essentielles
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
+    # Dépendances multimédias
     ffmpeg \
     imagemagick \
     webp \
-    ghostscript \
-    libwebp-dev \
+    # Dépendances audio
     libopus-dev \
     libopus0 \
+    # Dépendances graphiques et WebP
+    libwebp-dev \
+    libglib2.0-dev \
+    # Dépendances navigateur (pour puppeteer)
     libnss3 \
     libnspr4 \
-    libgbm-dev \
-    libglib2.0-dev \
-    libxi6 \
-    libgconf-2-4 \
-    libxext6 \
-    libxss1 \
-    libxcb1 \
-    libx11-xcb1 \
-    libxcb-dri3-0 \
-    libdrm2 \
-    libxtst6 \
-    libasound2 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxcb1 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm-dev \
+    libasound2 \
     libpangocairo-1.0-0 \
     libgtk-3-0 \
-    && apt-get upgrade -y \
-    && rm -rf /var/lib/apt/lists/*
+    # Dépendances système
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libxss1 \
+    lsb-release \
+    xdg-utils \
+    wget \
+    # Nettoyage pour réduire la taille de l'image
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/cache/apt/*
 
 # Création de l'utilisateur non-root pour la sécurité
-RUN useradd -m paterson
+RUN groupadd -r paterson && \
+    useradd -r -g paterson -m -d /home/paterson paterson && \
+    mkdir -p /home/paterson/app && \
+    chown -R paterson:paterson /home/paterson
+
+# Passage à l'utilisateur non-root
 USER paterson
 WORKDIR /home/paterson/app
 
-# Copie des fichiers de dépendances
+# Copie des fichiers de dépendances d'abord pour meilleur caching
 COPY --chown=paterson:paterson package*.json ./
+COPY --chown=paterson:paterson .npmrc ./
 
-# Installation des dépendances
-RUN npm install --omit=dev && \
-    npm install -g pm2
+# Installation des dépendances avec cache optimisé
+RUN npm ci --only=production --omit=dev && \
+    npm cache clean --force
 
-# Copie de l'application
+# Installation de PM2 globalement pour la gestion des processus
+RUN npm install -g pm2@latest
+
+# Copie de l'application (le reste du code)
 COPY --chown=paterson:paterson . .
 
 # Configuration des variables d'environnement
 ENV NODE_ENV=production
 ENV PORT=5000
-ENV TZ=Africa/Harare
+ENV TZ=Africa/Port-au-Prince
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Exposition du port et démarrage de l'application
+# Création des répertoires nécessaires avec les bonnes permissions
+RUN mkdir -p \
+    downloads \
+    media \
+    temp \
+    logs \
+    sessions \
+    cache && \
+    chmod 755 \
+    downloads \
+    media \
+    temp \
+    logs \
+    sessions \
+    cache
+
+# Exposition du port
 EXPOSE 5000
-CMD ["pm2-runtime", "start", "server.js", "--name", "PATERSON-MD"]
+
+# Health check pour vérifier que l'application fonctionne
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# Commande de démarrage avec PM2 pour la gestion des processus
+CMD ["pm2-runtime", "start", "ecosystem.config.js", "--env", "production"]
+
+# =============================================
+# Fichier ecosystem.config.js recommandé :
+# =============================================
+# module.exports = {
+#   apps: [{
+#     name: "PATERSON-MD",
+#     script: "./server.js",
+#     instances: "max",
+#     exec_mode: "cluster",
+#     env: {
+#       NODE_ENV: "production",
+#       PORT: 5000
+#     },
+#     error_file: "./logs/err.log",
+#     out_file: "./logs/out.log",
+#     log_file: "./logs/combined.log",
+#     time: true
+#   }]
+# }
