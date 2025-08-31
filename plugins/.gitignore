@@ -1,20 +1,268 @@
-# Fichiers sensibles
+# ==============================================
+# PATERSON-MD GITIGNORE
+# Configuration optimisée pour le bot WhatsApp
+# ==============================================
+
+# 🔒 Fichiers sensibles et sessions
 .env
+.env.*
+!.env.example
+*.env.local
+config/credentials.json
+config/settings.json
 *.session
 session.json
 *-auth-info.json
+*-creds.json
+*-state.json
+baileys_store.json
+pre-key.json
+signal-data.json
+appstate.json
+auth_info.json
+auth_info_baileys.json
 
-# Dossiers générés
+# 📁 Dossiers générés
 downloads/
 media/
-logs/
 temp/
+tmp/
+cache/
+logs/
+database/
+sessions/
+backups/
+storage/
+assets/generated/
 
-# Dépendances et builds
+# 📦 Dépendances et builds
 node_modules/
 dist/
+build/
+out/
+*.tsbuildinfo
+.esm-cache/
+.npm/
+.yarn-integrity
 
-# Fichiers système
+# 🖥️ Fichiers système
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+~$*
+
+# 📊 Logs et diagnostics
 *.log
-*.tmp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+debug.log
+error.log
+access.log
+*.log.*
+logs/**
+
+# 🔧 IDE et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.ropeproject
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.classpath
+.project
+.settings/
+*.launch
+bin/
+
+# 📝 Documentation générée
+docs/_build/
+docs/_static/
+docs/_templates/
+*.aux
+*.toc
+*.out
+*.log
+*.idx
+*.ind
+*.ilg
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# 🗄️ Base de données
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+*.dbf
+*.myd
+*.myi
+*.frm
+*.ibd
+
+# 📱 Applications mobiles
+*.ipa
+*.apk
+*.aab
+*.xcworkspace
+*.xcuserstate
+Pods/
+
+# 🐳 Docker
+.docker/
+docker-compose.override.yml
+.dockerignore
+
+# 🧪 Tests et couverture
+coverage/
+.nyc_output/
+*.lcov
+.istanbul/
+junit.xml
+test-results.xml
+
+# 📦 Packages
+*.tgz
+*.tar.gz
+*.zip
+*.7z
+*.rar
+*.deb
+*.rpm
+*.msi
+*.exe
+
+# 🔐 Certificats SSL
+*.key
+*.pem
+*.crt
+*.csr
+*.cer
+*.der
+*.pfx
+*.p12
+
+# 🎨 Assets temporaires
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.mp3
+*.mp4
+*.webm
+*.ogg
+*.wav
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+
+# 📊 Métriques et performances
+.flamegraph.html
+*.cpuprofile
+*.heapsnapshot
+
+# 🔍 Recherche
+.elasticbeanstalk/
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.tfstate.lock.info
+
+# 🛠️ Build tools
+.webpack/
+.parcel-cache/
+.cache/
+.rollup.cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.nuxt/
+.next/
+.gatsby/
+.vuepress/dist/
+.sapper/
+.wasm/
+
+# 📚 Documentation
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# ⚡️ PATERSON-MD spécifique
+# Fichiers de configuration personnalisés
+config/local/*
+!config/local/.gitkeep
+
+# Fichiers de backup automatiques
+backup/*.bak
+backup/*.backup
+
+# Fichiers de cache plugin
+plugins/**/*.cache
+plugins/**/temp/
+
+# Fichiers de statistiques
+stats/*
+analytics/
+
+# Fichiers de mise à jour
+update/
+patches/
+
+# ==============================================
+# EXCEPTIONS - Fichiers à garder même s'ils matchent les patterns
+# ==============================================
+
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+!SECURITY.md
+!CHANGELOG.md
+!.github/
+!.gitkeep
+!example.env
+!config/example.settings.json
+
+# Garder les dossiers vides
+!downloads/.gitkeep
+!media/.gitkeep
+!temp/.gitkeep
+!logs/.gitkeep
+!cache/.gitkeep
+
+# ==============================================
+# NOTES D'UTILISATION
+# ==============================================
+
+# Pour ignorer un fichier spécifique qui serait déjà tracké:
+# git rm --cached nom_du_fichier
+
+# Pour vérifier les fichiers qui seront ignorés:
+# git check-ignore -v nom_du_fichier
+
+# Les patterns avec / à la fin ignorent le dossier entier
+# Les patterns avec * sont des wildcards
+# ! devant un pattern signifie "ne pas ignorer"
