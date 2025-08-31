@@ -1,18 +1,175 @@
-// plugins/💬️/package.json
 {
-  "name": "paterson-md-core",
+  "name": "paterson-md-bot",
   "version": "3.6.0",
-  "description": "Module principal du bot WhatsApp PATERSON-MD",
+  "description": "🤖 Bot WhatsApp PATERSON-MD - Solution complète de messagerie avec fonctionnalités avancées créée par Kervens Aubourg",
   "main": "main.js",
   "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "node main.js --dev",
+    "test": "node test.js",
+    "setup": "npm install && node setup.js"
+  },
+  "keywords": [
+    "whatsapp-bot",
+    "whatsapp",
+    "bot",
+    "automation",
+    "ai",
+    "messaging",
+    "paterson-md",
+    "kervens-aubourg"
+  ],
+  "author": "Kervens Aubourg <kervensaubourg@proton.me>",
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/PATERSON-MD/PATERSON-MD",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PATERSON-MD/PATERSON-MD.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PATERSON-MD/PATERSON-MD/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
-    "@openai/api": "^4.0.0",
-    "whatsapp-web.js": "^1.24.0",
+    // Core WhatsApp
+    "@whiskeysockets/baileys": "^6.6.7",
     "qrcode-terminal": "^0.12.0",
-    "crypto-js": "^4.1.1"
+    
+    // AI & Machine Learning
+    "openai": "^4.20.1",
+    "google-generative-ai": "^0.2.1",
+    "tensorflow": "^2.4.0",
+    
+    // Media Processing
+    "fluent-ffmpeg": "^2.1.2",
+    "sharp": "^0.32.6",
+    "ytdl-core": "^4.11.5",
+    "music-metadata": "^7.14.0",
+    
+    // Web & APIs
+    "axios": "^1.6.0",
+    "node-fetch": "^3.3.2",
+    "form-data": "^4.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^21.5.2",
+    
+    // Utilities
+    "crypto-js": "^4.1.1",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    
+    // Database & Storage
+    "lowdb": "^5.1.0",
+    "mongoose": "^7.5.0",
+    "sqlite3": "^5.1.6",
+    "redis": "^4.6.8",
+    
+    // File Processing
+    "adm-zip": "^0.5.10",
+    "csv-parse": "^5.4.0",
+    "pdfkit": "^0.13.0",
+    
+    // Security
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "validator": "^13.11.0",
+    
+    // Networking
+    "socket.io": "^4.7.2",
+    "ws": "^8.14.2",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    
+    // Audio/Video
+    "node-gtts": "^2.0.2",
+    "sound-play": "^1.1.0",
+    "webpmux": "^3.1.0",
+    
+    // Image Processing
+    "jimp": "^0.22.10",
+    "canvas": "^2.11.2",
+    "gifuct-js": "^2.0.0",
+    
+    // CLI & Logging
+    "commander": "^10.0.1",
+    "inquirer": "^8.2.6",
+    "winston": "^3.10.0",
+    "log4js": "^6.9.1",
+    
+    // System
+    "node-cron": "^3.0.2",
+    "pm2": "^5.3.0",
+    "dotenv": "^16.3.1",
+    "config": "^3.3.9",
+    
+    // Specialized APIs
+    "tiktok-scraper": "^1.4.35",
+    "instagram-scraper": "^0.4.0",
+    "spotify-web-api-node": "^5.0.2",
+    "twit": "^2.2.11",
+    
+    // Internationalization
+    "i18n": "^0.15.1",
+    "google-translate-api": "^2.3.0",
+    
+    // Payment & Monetization
+    "stripe": "^12.18.0",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "typescript": "^5.1.6",
+    "eslint": "^8.47.0",
+    "prettier": "^3.0.2",
+    "nodemon": "^3.0.1",
+    "mocha": "^10.2.0",
+    "chai": "^4.3.7",
+    "nyc": "^15.1.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^8.5.0",
+    "node-canvas": "^2.11.2",
+    "playwright": "^1.37.0"
   },
   "patersonConfig": {
+    "version": "3.6.0",
+    "codename": "Quantum",
     "category": "core",
-    "priority": 1000
+    "priority": 1000,
+    "minNodeVersion": "18.0.0",
+    "supportedPlatforms": [
+      "windows",
+      "linux",
+      "macos",
+      "android",
+      "render",
+      "heroku",
+      "railway"
+    ],
+    "features": [
+      "ai-chat",
+      "media-download",
+      "group-management",
+      "sticker-creation",
+      "payment-integration",
+      "multi-language",
+      "plugin-system",
+      "database-support",
+      "web-dashboard"
+    ]
+  },
+  "contributors": [
+    "Kervens Aubourg <kervensaubourg@proton.me>"
+  ],
+  "funding": {
+    "type": "patreon",
+    "url": "https://patreon.com/paterson_md"
   }
 }
