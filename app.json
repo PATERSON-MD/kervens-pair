@@ -1,46 +1,77 @@
 {
-    "name": "PATERSON-MD Session Generator",
-    "description": "Secure WhatsApp session generator with cloud storage",
-    "logo": "https://i.ibb.co/pXL9RYv/temp-image.jpg",
-    "repository": "https://github.com/KervensAubourg/PATERSON-MD",
+    "name": "PATERSON-MD WhatsApp Bot",
+    "description": "🤖 Advanced WhatsApp Bot with AI features, media download, and group management. Created by Kervens Aubourg",
+    "logo": "https://files.catbox.moe/usgvo9.jpg",
+    "repository": "https://github.com/PATERSON-MD/PATERSON-MD",
     "keywords": [
-        "PATERSON-MD", 
-        "WhatsApp-Bot", 
-        "Baileys", 
-        "Session-Generator",
-        "KervensAubourg"
+        "whatsapp",
+        "bot", 
+        "ai",
+        "automation",
+        "baileys",
+        "whatsapp-api",
+        "whatsapp-bot",
+        "paterson-md",
+        "kervens-aubourg",
+        "media-download",
+        "group-management",
+        "ai-chat",
+        "sticker-maker"
     ],
     "success_url": "/", 
+    "website": "https://github.com/PATERSON-MD/PATERSON-MD",
     "buildpacks": [
         { 
-            "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest" 
+            "url": "heroku/nodejs" 
         },
         {
             "url": "https://github.com/jontewks/puppeteer-heroku-buildpack"
+        },
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-apt"
         }
     ],
     "env": {      
         "PORT": {
-            "description": "Port for web application",
+            "description": "Port for the web server",
             "value": "5000",
             "required": false 
         },
-        "MEGA_EMAIL": {
-            "description": "Your MEGA.nz account email",
-            "required": true
-        },
-        "MEGA_PASSWORD": {
-            "description": "Your MEGA.nz account password",
-            "required": true
+        "NODE_ENV": {
+            "description": "Node.js environment",
+            "value": "production",
+            "required": false
         },
         "TZ": {
             "description": "Timezone for the application",
-            "value": "Africa/Harare",
+            "value": "Africa/Port-au-Prince",
             "required": false
         },
-        "NODE_ENV": {
-            "description": "Node environment",
-            "value": "production",
+        "SESSION_SECRET": {
+            "description": "Secret key for session encryption (generate a random string)",
+            "generator": "secret",
+            "required": true
+        },
+        "OPENAI_API_KEY": {
+            "description": "Your OpenAI API key for AI features (optional)",
+            "required": false
+        },
+        "MONGODB_URI": {
+            "description": "MongoDB connection string for database (optional)",
+            "required": false
+        },
+        "REDIS_URL": {
+            "description": "Redis connection URL for caching (optional)",
+            "required": false
+        },
+        "LOG_LEVEL": {
+            "description": "Logging level (debug, info, warn, error)",
+            "value": "info",
+            "required": false
+        },
+        "MAX_FILE_SIZE": {
+            "description": "Maximum file size for uploads in MB",
+            "value": "50",
             "required": false
         }
     },
@@ -48,11 +79,38 @@
         "web": {
             "quantity": 1,
             "size": "free"
+        },
+        "worker": {
+            "quantity": 1,
+            "size": "free"
         }
     },
     "addons": [
         {
-            "plan": "heroku-redis:hobby-dev"
+            "plan": "heroku-redis:hobby-dev",
+            "as": "REDIS"
+        },
+        {
+            "plan": "mongolab:sandbox",
+            "as": "MONGODB"
+        },
+        {
+            "plan": "papertrail:choklad",
+            "as": "PAPERTRAIL"
         }
-    ]
+    ],
+    "scripts": {
+        "postdeploy": "npm run setup"
+    },
+    "stack": "heroku-22",
+    "environments": {
+        "test": {
+            "scripts": {
+                "test": "npm test"
+            }
+        }
+    },
+    "success": {
+        "message": "🚀 PATERSON-MD deployed successfully! Visit / to generate your WhatsApp session."
+    }
 }
