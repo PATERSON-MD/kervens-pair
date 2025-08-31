@@ -6,27 +6,43 @@ const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const { getBuffer } = require('../utils');
+const FormData = require('form-data');
 
 // Créer le dossier tmp s'il n'existe pas
 const TMP_DIR = path.join(__dirname, '../tmp');
 if (!fs.existsSync(TMP_DIR)) {
-    fs.mkdirSync(TMP_DIR);
+    fs.mkdirSync(TMP_DIR, { recursive: true });
 }
 
 module.exports = [
     {
-        pattern: "ytmp3",
+        pattern: "play",
         react: "🎵",
-        desc: "Télécharger un audio YouTube",
+        desc: "Rechercher et jouer de la musique depuis YouTube",
         category: "download",
         filename: __filename,
         async handler(conn, mek, m, { reply, text }) {
-            if (!text) return reply("❌ Veuillez fournir un lien YouTube");
+            if (!text) return reply("❌ Veuillez fournir un titre de musique");
             
             try {
-                const videoUrl = text.trim();
+                reply("🔍 Recherche de la musique...");
+                
+                // Recherche YouTube
+                const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(text)}`;
+                const { data } = await axios.get(searchUrl);
+                
+                // Extraire le premier résultat
+                const videoIdMatch = data.match(/"videoId":"([^"]+)"/);
+                if (!videoIdMatch) return reply("❌ Aucun résultat trouvé");
+                
+                const videoId = videoIdMatch[1];
+                const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
                 const videoInfo = await ytdl.getInfo(videoUrl);
-                const title = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
+                const title = videoInfo.videoDetails.title;
+                const duration = parseInt(videoInfo.videoDetails.lengthSeconds);
+                
+                if (duration > 600) 
+                    return reply("❌ Les musiques de plus de 10 minutes ne sont pas supportées");
                 
                 reply(`⬇️ Téléchargement: ${title}...`);
                 
@@ -50,7 +66,62 @@ module.exports = [
                         contextInfo: {
                             externalAdReply: {
                                 title: `🎵 ${title}`,
-                                body: `Téléchargé par ${m.pushname}`,
+                                body: `Durée: ${Math.floor(duration/60)}:${duration%60 < 10 ? '0' : ''}${duration%60}`,
+                                thumbnail: await getBuffer(videoInfo.videoDetails.thumbnails[0].url)
+                            }
+                        }
+                    },
+                    { quoted: mek }
+                );
+                
+                fs.unlinkSync(tmpPath);
+            } catch (e) {
+                console.error("Erreur play:", e);
+                reply("❌ Échec de la recherche ou du téléchargement.");
+            }
+        }
+    },
+    {
+        pattern: "ytmp3",
+        react: "🎵",
+        desc: "Télécharger un audio YouTube",
+        category: "download",
+        filename: __filename,
+        async handler(conn, mek, m, { reply, text }) {
+            if (!text) return reply("❌ Veuillez fournir un lien YouTube");
+            
+            try {
+                const videoUrl = text.trim();
+                const videoInfo = await ytdl.getInfo(videoUrl);
+                const title = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
+                const duration = parseInt(videoInfo.videoDetails.lengthSeconds);
+                
+                if (duration > 600) 
+                    return reply("❌ Les vidéos de plus de 10 minutes ne sont pas supportées");
+                
+                reply(`⬇️ Téléchargement: ${title}...`);
+                
+                const tmpPath = path.join(TMP_DIR, `${Date.now()}_${title}.mp3`);
+                const stream = ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' });
+                
+                await new Promise((resolve, reject) => {
+                    ffmpeg(stream)
+                        .audioBitrate(320)
+                        .save(tmpPath)
+                        .on('end', resolve)
+                        .on('error', reject);
+                });
+                
+                await conn.sendMessage(
+                    m.chat,
+                    {
+                        audio: fs.readFileSync(tmpPath),
+                        mimetype: 'audio/mpeg',
+                        fileName: `${title}.mp3`,
+                        contextInfo: {
+                            externalAdReply: {
+                                title: `🎵 ${title}`,
+                                body: `Durée: ${Math.floor(duration/60)}:${duration%60 < 10 ? '0' : ''}${duration%60}`,
                                 thumbnail: await getBuffer(videoInfo.videoDetails.thumbnails[0].url)
                             }
                         }
@@ -80,8 +151,8 @@ module.exports = [
                 const title = videoInfo.videoDetails.title.replace(/[^\w\s]/gi, '');
                 const duration = parseInt(videoInfo.videoDetails.lengthSeconds);
                 
-                if (duration > 600) 
-                    return reply("❌ Les vidéos de plus de 10 minutes ne sont pas supportées");
+                if (duration > 300) 
+                    return reply("❌ Les vidéos de plus de 5 minutes ne sont pas supportées");
                 
                 reply(`⬇️ Téléchargement: ${title}...`);
                 
@@ -96,7 +167,7 @@ module.exports = [
                     m.chat,
                     {
                         video: fs.readFileSync(tmpPath),
-                        caption: `🎬 *${title}*\nDurée: ${Math.floor(duration/60)}:${duration%60}`,
+                        caption: `🎬 *${title}*\nDurée: ${Math.floor(duration/60)}:${duration%60 < 10 ? '0' : ''}${duration%60}`,
                         fileName: `${title}.mp4`,
                         gifPlayback: false
                     },
@@ -182,7 +253,7 @@ module.exports = [
     },
     {
         pattern: "tiktok",
-        react: "🎵",
+        react: "📱",
         desc: "Télécharger une vidéo TikTok",
         category: "download",
         filename: __filename,
@@ -195,33 +266,17 @@ module.exports = [
                 const apiUrl = `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(text)}`;
                 const { data } = await axios.get(apiUrl);
                 
-                if (!data.video || !data.music) 
+                if (!data.video) 
                     return reply("❌ Échec de la récupération du contenu TikTok");
                 
-                // Télécharger la vidéo
                 const videoBuffer = await getBuffer(data.video);
                 
-                // Télécharger l'audio
-                const audioBuffer = await getBuffer(data.music);
-                
-                // Envoyer la vidéo avec audio intégré
                 await conn.sendMessage(
                     m.chat,
                     {
                         video: videoBuffer,
-                        caption: `🎵 TikTok - ${data.author.nickname}\n${data.title}`,
+                        caption: `📱 TikTok - ${data.author?.nickname || 'Unknown'}\n${data.title || ''}`,
                         gifPlayback: false
-                    },
-                    { quoted: mek }
-                );
-                
-                // Envoyer l'audio séparément
-                await conn.sendMessage(
-                    m.chat,
-                    {
-                        audio: audioBuffer,
-                        mimetype: 'audio/mpeg',
-                        fileName: 'audio_tiktok.mp3'
                     },
                     { quoted: mek }
                 );
@@ -243,164 +298,121 @@ module.exports = [
             try {
                 reply("🔍 Recherche sur Spotify...");
                 
-                // Recherche ou traitement du lien
-                const isUrl = text.includes('spotify.com');
-                let songData;
+                // Utiliser une API tierce pour Spotify
+                const { data } = await axios.get(
+                    `https://api.spotify-downloader.com/?url=${encodeURIComponent(text)}`
+                );
                 
-                if (isUrl) {
-                    // Extraction depuis un lien
-                    const trackId = text.split('/track/')[1]?.split('?')[0];
-                    if (!trackId) return reply("❌ Lien Spotify invalide");
-                    
-                    const { data } = await axios.get(
-                        `https://api.spotify.com/v1/tracks/${trackId}`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${config.SPOTIFY_TOKEN}`
-                            }
-                        }
-                    );
-                    songData = data;
-                } else {
-                    // Recherche par texte
-                    const { data } = await axios.get(
-                        `https://api.spotify.com/v1/search?q=${encodeURIComponent(text)}&type=track&limit=1`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${config.SPOTIFY_TOKEN}`
-                            }
-                        }
-                    );
-                    songData = data.tracks.items[0];
-                    if (!songData) return reply("❌ Aucun résultat trouvé");
-                }
+                if (!data.success) return reply("❌ Échec de la recherche Spotify");
                 
-                const title = songData.name;
-                const artist = songData.artists.map(a => a.name).join(', ');
-                const album = songData.album.name;
-                const duration = Math.floor(songData.duration_ms / 1000);
+                const title = data.title;
+                const artist = data.artist;
                 
                 reply(`⬇️ Téléchargement: ${title} - ${artist}...`);
                 
-                // Recherche sur YouTube
-                const ytSearch = await axios.get(
-                    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(`${title} ${artist}`)}&key=${config.YOUTUBE_API_KEY}&maxResults=1`
-                );
-                
-                const videoId = ytSearch.data.items[0]?.id.videoId;
-                if (!videoId) return reply("❌ Vidéo YouTube non trouvée");
-                
-                // Téléchargement depuis YouTube
-                const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-                const videoInfo = await ytdl.getInfo(videoUrl);
-                
-                const tmpPath = path.join(TMP_DIR, `${Date.now()}_${title}.mp3`);
-                const stream = ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' });
-                
-                await new Promise((resolve, reject) => {
-                    ffmpeg(stream)
-                        .audioBitrate(320)
-                        .save(tmpPath)
-                        .on('end', resolve)
-                        .on('error', reject);
-                });
-                
-                // Ajouter les métadonnées
-                const coverBuffer = await getBuffer(songData.album.images[0].url);
+                const audioBuffer = await getBuffer(data.download_url);
                 
                 await conn.sendMessage(
                     m.chat,
                     {
-                        audio: fs.readFileSync(tmpPath),
+                        audio: audioBuffer,
                         mimetype: 'audio/mpeg',
                         fileName: `${title}.mp3`,
                         contextInfo: {
                             externalAdReply: {
                                 title: `🎧 ${title}`,
-                                body: `${artist} | ${album}`,
-                                thumbnail: coverBuffer
+                                body: artist,
+                                thumbnail: await getBuffer(data.thumbnail)
                             }
                         }
                     },
                     { quoted: mek }
                 );
-                
-                fs.unlinkSync(tmpPath);
             } catch (e) {
                 console.error("Erreur spotify:", e);
-                reply("❌ Échec du téléchargement. Vérifiez le token Spotify ou la connexion API.");
+                reply("❌ Échec du téléchargement. Vérifiez le lien ou essayez plus tard.");
             }
         }
     },
     {
-        pattern: "imgsrc",
-        react: "🖼️",
-        desc: "Télécharger une image depuis un lien",
+        pattern: "fbdl",
+        react: "📹",
+        desc: "Télécharger depuis Facebook",
         category: "download",
         filename: __filename,
         async handler(conn, mek, m, { reply, text }) {
-            if (!text) return reply("❌ Veuillez fournir un lien d'image");
+            if (!text) return reply("❌ Veuillez fournir un lien Facebook");
             
             try {
-                reply("⬇️ Téléchargement de l'image...");
+                reply("⬇️ Téléchargement Facebook...");
                 
-                const imageBuffer = await getBuffer(text);
+                const apiUrl = `https://fbdown.net/api/apiServer.php?url=${encodeURIComponent(text)}`;
+                const { data } = await axios.get(apiUrl);
                 
-                await conn.sendMessage(
-                    m.chat,
-                    { image: imageBuffer },
-                    { quoted: mek }
-                );
-            } catch (e) {
-                console.error("Erreur imgsrc:", e);
-                reply("❌ Échec du téléchargement. Lien invalide ou image trop lourde.");
-            }
-        }
-    },
-    {
-        pattern: "mediafire",
-        react: "📦",
-        desc: "Télécharger depuis MediaFire",
-        category: "download",
-        filename: __filename,
-        async handler(conn, mek, m, { reply, text }) {
-            if (!text) return reply("❌ Veuillez fournir un lien MediaFire");
-            
-            try {
-                reply("🔍 Traitement du lien MediaFire...");
+                if (!data.links || data.links.length === 0) 
+                    return reply("❌ Aucun média trouvé");
                 
-                const { data } = await axios.get(
-                    `https://api.mediafire.com/v1.0/file/link?quickkey=${text.split('/')[4]}`,
-                    { headers: { 'Authorization': `Bearer ${config.MEDIAFIRE_TOKEN}` } }
-                );
-                
-                if (!data.response.file_info || !data.response.file_info.download_url) 
-                    return reply("❌ Fichier non trouvé");
-                
-                const fileUrl = data.response.file_info.download_url;
-                const fileName = data.response.file_info.filename;
-                const fileSize = data.response.file_info.size;
-                
-                if (fileSize > 50 * 1024 * 1024) // 50MB
-                    return reply(`❌ Fichier trop volumineux (${(fileSize / 1024 / 1024).toFixed(2)} MB)`);
-                
-                reply(`⬇️ Téléchargement: ${fileName} (${(fileSize / 1024 / 1024).toFixed(2)} MB)...`);
-                
-                const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-                const fileBuffer = Buffer.from(response.data);
+                const videoUrl = data.links[0].url;
+                const videoBuffer = await getBuffer(videoUrl);
                 
                 await conn.sendMessage(
                     m.chat,
                     {
-                        document: fileBuffer,
-                        fileName: fileName,
-                        mimetype: response.headers['content-type']
+                        video: videoBuffer,
+                        caption: `📹 Facebook Video\n${data.title || ''}`,
+                        gifPlayback: false
                     },
                     { quoted: mek }
                 );
             } catch (e) {
-                console.error("Erreur mediafire:", e);
-                reply("❌ Échec du téléchargement. Lien invalide ou problème d'API.");
+                console.error("Erreur fbdl:", e);
+                reply("❌ Échec du téléchargement. Lien invalide ou vidéo privée.");
+            }
+        }
+    },
+    {
+        pattern: "twitter",
+        react: "🐦",
+        desc: "Télécharger depuis Twitter/X",
+        category: "download",
+        filename: __filename,
+        async handler(conn, mek, m, { reply, text }) {
+            if (!text) return reply("❌ Veuillez fournir un lien Twitter");
+            
+            try {
+                reply("⬇️ Téléchargement Twitter...");
+                
+                const apiUrl = `https://twitsave.com/info?url=${encodeURIComponent(text)}`;
+                const { data } = await axios.get(apiUrl);
+                
+                if (!data.media) return reply("❌ Aucun média trouvé");
+                
+                const mediaUrl = data.media[0].url;
+                const mediaBuffer = await getBuffer(mediaUrl);
+                
+                if (data.media[0].type === 'video') {
+                    await conn.sendMessage(
+                        m.chat,
+                        {
+                            video: mediaBuffer,
+                            caption: `🐦 Twitter Video\n${data.text || ''}`,
+                            gifPlayback: false
+                        },
+                        { quoted: mek }
+                    );
+                } else {
+                    await conn.sendMessage(
+                        m.chat,
+                        {
+                            image: mediaBuffer,
+                            caption: `🐦 Twitter Image\n${data.text || ''}`
+                        },
+                        { quoted: mek }
+                    );
+                }
+            } catch (e) {
+                console.error("Erreur twitter:", e);
+                reply("❌ Échec du téléchargement. Lien invalide ou tweet protégé.");
             }
         }
     },
@@ -436,19 +448,18 @@ module.exports = [
                 
                 reply("⬆️ Téléversement du média...");
                 
-                const media = quoted.message[messageType];
                 const buffer = await conn.downloadMediaMessage(quoted);
                 
+                // Utiliser un service d'hébergement temporaire
                 const form = new FormData();
                 form.append('file', buffer, `media.${mediaType === 'image' ? 'jpg' : mediaType === 'audio' ? 'mp3' : 'mp4'}`);
                 
-                const { data } = await axios.post('https://tmpfiles.org/api/v1/upload', form, {
+                const { data } = await axios.post('https://file.io', form, {
                     headers: form.getHeaders()
                 });
                 
-                if (data.data && data.data.url) {
-                    const directUrl = data.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-                    reply(`🔗 URL ${mediaType.toUpperCase()}:\n${directUrl}\n\n⚠️ Expire après 3 jours`);
+                if (data.success) {
+                    reply(`🔗 URL ${mediaType.toUpperCase()}:\n${data.link}\n\n⚠️ Expire après 14 jours`);
                 } else {
                     reply('❌ Échec du téléversement du média');
                 }
@@ -459,36 +470,24 @@ module.exports = [
         }
     },
     {
-        pattern: "scloud",
-        react: "☁️",
-        desc: "Télécharger depuis SoundCloud",
+        pattern: "shorturl",
+        react: "🔗",
+        desc: "Raccourcir un URL",
         category: "download",
         filename: __filename,
         async handler(conn, mek, m, { reply, text }) {
-            if (!text) return reply("❌ Veuillez fournir un lien SoundCloud");
+            if (!text) return reply("❌ Veuillez fournir un URL");
             
             try {
-                reply("🔍 Recherche sur SoundCloud...");
+                reply("🔗 Raccourcissement de l'URL...");
                 
-                const { data } = await axios.get(
-                    `https://api.soundcloud.com/resolve?url=${encodeURIComponent(text)}&client_id=${config.SOUNDCLOUD_CLIENT_ID}`
-                );
+                const { data } = await axios.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(text)}`);
                 
-                if (!data.stream_url) return reply("❌ Piste non trouvée");
-                
-                const title = data.title;
-                const artist = data.user.username;
-                const duration = Math.floor(data.duration / 1000);
-                
-                reply(`⬇️ Téléchargement: ${title} - ${artist}...`);
-                
-                const streamUrl = `${data.stream_url}?client_id=${config.SOUNDCLOUD_CLIENT_ID}`;
-                const audioBuffer = await getBuffer(streamUrl);
-                
-                await conn.sendMessage(
-                    m.chat,
-                    {
-                        audio: audioBuffer,
-                        mimetype: 'audio/mpeg',
-                        fileName: `${title}.mp3`,
-                        contextInfo:
+                reply(`🔗 URL raccourci:\n${data}`);
+            } catch (e) {
+                console.error("Erreur shorturl:", e);
+                reply("❌ Échec du raccourcissement de l'URL");
+            }
+        }
+    }
+];
