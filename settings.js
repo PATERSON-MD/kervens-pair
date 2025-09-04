@@ -57,7 +57,7 @@ module.exports = {
     LIVE_MSG: process.env.LIVE_MSG || 
 `> ʙᴏᴛ ɪs sᴘᴀʀᴋɪɴɢ ᴀᴄᴛɪᴠᴇ ᴀɴᴅ ᴀʟɪᴠᴇ
 
-ᴋᴇᴇᴘ ᴜsɪɴɢ ✦ʟɪᴛᴇ xᴅ✦ ғʀᴏᴍ Kervens king ɪɴᴄ⚡
+ᴋᴇᴇᴘ ᴜsɪɴɢ ✦PATERSON-MD✦ ғʀᴏᴍ Kervens king ɪɴᴄ⚡
 
 *© ᴡʜᴀᴛꜱᴀᴘᴘ ʙᴏᴛ - ᴍᴅ*
 
