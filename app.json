@@ -1,116 +1,58 @@
 {
-    "name": "PATERSON-MD WhatsApp Bot",
-    "description": "🤖 Advanced WhatsApp Bot with AI features, media download, and group management. Created by Kervens Aubourg",
-    "logo": "https://files.catbox.moe/usgvo9.jpg",
-    "repository": "https://github.com/PATERSON-MD/PATERSON-MD",
-    "keywords": [
-        "whatsapp",
-        "bot", 
-        "ai",
-        "automation",
-        "baileys",
-        "whatsapp-api",
-        "whatsapp-bot",
-        "paterson-md",
-        "kervens-aubourg",
-        "media-download",
-        "group-management",
-        "ai-chat",
-        "sticker-maker"
-    ],
-    "success_url": "/", 
-    "website": "https://github.com/PATERSON-MD/PATERSON-MD",
-    "buildpacks": [
-        { 
-            "url": "heroku/nodejs" 
-        },
-        {
-            "url": "https://github.com/jontewks/puppeteer-heroku-buildpack"
-        },
-        {
-            "url": "https://github.com/heroku/heroku-buildpack-apt"
-        }
-    ],
-    "env": {      
-        "PORT": {
-            "description": "Port for the web server",
-            "value": "5000",
-            "required": false 
-        },
-        "NODE_ENV": {
-            "description": "Node.js environment",
-            "value": "production",
-            "required": false
-        },
-        "TZ": {
-            "description": "Timezone for the application",
-            "value": "Africa/Port-au-Prince",
-            "required": false
-        },
-        "SESSION_SECRET": {
-            "description": "Secret key for session encryption (generate a random string)",
-            "generator": "secret",
-            "required": true
-        },
-        "OPENAI_API_KEY": {
-            "description": "Your OpenAI API key for AI features (optional)",
-            "required": false
-        },
-        "MONGODB_URI": {
-            "description": "MongoDB connection string for database (optional)",
-            "required": false
-        },
-        "REDIS_URL": {
-            "description": "Redis connection URL for caching (optional)",
-            "required": false
-        },
-        "LOG_LEVEL": {
-            "description": "Logging level (debug, info, warn, error)",
-            "value": "info",
-            "required": false
-        },
-        "MAX_FILE_SIZE": {
-            "description": "Maximum file size for uploads in MB",
-            "value": "50",
-            "required": false
-        }
+  "name": "PATERSON-MD",
+  "description": "Javascript WhatsApp bot made by ᴍᴀʟᴠɪɴ ᴛᴇᴄʜ",
+  "logo": "https://files.catbox.moe/qumhu4.jpg",
+  "keywords": ["PATERSON-MD"],
+  "success_url": "/",
+
+    "stack": "container",
+  "env": {
+    "SESSION_ID": {
+      "description": "Must Start with 'lite~'",
+      "required": true,
+      "value": ""
     },
-    "formation": {
-        "web": {
-            "quantity": 1,
-            "size": "free"
-        },
-        "worker": {
-            "quantity": 1,
-            "size": "free"
-        }
+      "BOT_NAME": {
+        "description": "write here your bot name.",
+        "required": true,
+        "value": "ℙ𝕒𝕥𝕖𝕣𝕤𝕠𝕟-𝕞𝕕"      
+    },  
+    "MODE": {
+      "description": "Set private/public/inbox/groups",
+      "required": false,
+      "value": "public"
+     },
+   
+    "PREFIX": {
+      "description": "Your Bot Prefix (default: .) You can put your own custom prefix",
+      "required": true,
+      "value": "."
     },
-    "addons": [
-        {
-            "plan": "heroku-redis:hobby-dev",
-            "as": "REDIS"
-        },
-        {
-            "plan": "mongolab:sandbox",
-            "as": "MONGODB"
-        },
-        {
-            "plan": "papertrail:choklad",
-            "as": "PAPERTRAIL"
-        }
-    ],
-    "scripts": {
-        "postdeploy": "npm run setup"
+    
+    "OWNER_NAME": {
+      "description": "Put Owner Name Here",
+      "required": true,
+      "value": "𝕂𝕖𝕣𝕧𝕖𝕟𝕤 𝕜𝕚𝕟𝕘"
     },
-    "stack": "heroku-22",
-    "environments": {
-        "test": {
-            "scripts": {
-                "test": "npm test"
-            }
-        }
+    "OWNER_NUMBER": {
+      "description": "Put only one Owner Number Here",
+      "required": true,
+      "value": "50942737567"
     },
-    "success": {
-        "message": "🚀 PATERSON-MD deployed successfully! Visit / to generate your WhatsApp session."
+    
+    "PRESENCE": {
+      "description": "Put online/typing/recording/unavailable",
+      "required": true,
+      "value": "online"
     }
+
+},
+
+     "buildpacks": [
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+        }
+     ],
+  "stack": "heroku-24"
 }
+  
