@@ -138,7 +138,7 @@ public class PatersonMD extends JFrame {
 <div class = "repo" align = "center">
  
 <a href = "#">
-<img src = "https://files.catbox.moe/bqs70b.jpg"  width="300" height="200">
+<img src = "https://files.catbox.moe/usgvo9.jpg"  width="300" height="200">
 </img>
  <p align="center">
   <a href="#"><img src="http://readme-typing-svg.herokuapp.com?color=ff00ab&center=true&vCenter=true&multiline=false&lines=PATERSON-MD+MD+WHATSAPP+BOT+MD" alt="">
@@ -153,7 +153,7 @@ public class PatersonMD extends JFrame {
 
 <a><img src='https://i.imgur.com/LyHic3i.gif'/>
 
-🔑 Get Session ID (WhatsApp Pair Code Login)
+🔑 Get Session ID (https://paterson-session-pair-bot.onrender.com/)
 
 > To deploy, generate your session ID from the link below:
 <p align="left">
