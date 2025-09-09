@@ -1,290 +1,118 @@
-# 🔥 PATERSON-MD Session Generator💀
-
-## 📊 Visitor Counter🚶
-
-<p align="center">
-  <img src="https://profile-counter.glitch.me/KervensAubourg/count.svg" alt="PATERSON-MD Visitor Counter"/>
-</p>
-
----
-
-## 💡 Fork & Deploy PATERSON-MD👍🏻
-
-[![Fork Repo](https://img.shields.io/badge/FORK-REPO-8A2BE2?style=for-the-badge&logo=github)](https://github.com/KervensAubourg/PATERSON-MD/fork)
-
-Generate secure WhatsApp sessions using ✋🏻[`@whiskeysockets/baileys`](https://github.com/whiskeysockets/baileys) with:
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-public class PatersonMD extends JFrame {
-    
-    public PatersonMD() {
-        super("PATERSON-MD - WhatsApp Bot");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-        
-        // Create main panel with gradient background
-        JPanel mainPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                GradientPaint gp = new GradientPaint(0, 0, new Color(25, 25, 35), 
-                        getWidth(), getHeight(), new Color(10, 30, 45));
-                g2d.setPaint(gp);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-                
-                // Draw hacker pattern
-                g2d.setColor(new Color(0, 200, 100, 30));
-                for (int i = 0; i < 100; i++) {
-                    int x = (int) (Math.random() * getWidth());
-                    int y = (int) (Math.random() * getHeight());
-                    g2d.drawString("1", x, y);
-                    g2d.drawString("0", x+10, y+10);
-                }
-            }
-        };
-        mainPanel.setLayout(new BorderLayout(20, 20));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        // Header panel
-        JPanel headerPanel = new JPanel();
-        headerPanel.setOpaque(false);
-        headerPanel.setLayout(new BorderLayout());
-        
-        JLabel titleLabel = new JLabel("PATERSON-MD");
-        titleLabel.setFont(new Font("Consolas", Font.BOLD, 36));
-        titleLabel.setForeground(new Color(0, 200, 100));
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        JLabel subtitleLabel = new JLabel("Ultimate WhatsApp Bot Solution");
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        subtitleLabel.setForeground(new Color(180, 180, 220));
-        subtitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
-        headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
-        
-        // Image panel
-        JLabel imageLabel = new JLabel();
-        imageLabel.setIcon(new ImageIcon(createMatrixImage()));
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        // Buttons panel
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        buttonPanel.setOpaque(false);
-        
-        JButton sessionButton = createHackerButton("🔑 GET SESSION ID", new Color(0, 150, 200));
-        JButton herokuButton = createHackerButton("🚀 DEPLOY ON HEROKU", new Color(100, 50, 200));
-        JButton renderButton = createHackerButton("☁️ DEPLOY ON RENDER", new Color(200, 100, 50));
-        
-        sessionButton.addActionListener(e -> openURL("https://example.com/session"));
-        herokuButton.addActionListener(e -> openURL("https://heroku.com/deploy"));
-        renderButton.addActionListener(e -> openURL("https://render.com/deploy"));
-        
-        buttonPanel.add(sessionButton);
-        buttonPanel.add(herokuButton);
-        buttonPanel.add(renderButton);
-        
-        // Footer panel
-        JPanel footerPanel = new JPanel();
-        footerPanel.setOpaque(false);
-        JLabel footerLabel = new JLabel("Created by KERVENS AUBOURG 🇭🇹 | PATERSON-MD v3.0");
-        footerLabel.setForeground(new Color(150, 180, 200));
-        footerPanel.add(footerLabel);
-        
-        // Add components to main panel
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
-        mainPanel.add(imageLabel, BorderLayout.CENTER);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-        mainPanel.add(footerPanel, BorderLayout.SOUTH);
-        
-        add(mainPanel);
-        setVisible(true);
-    }
-    
-    private Image createMatrixImage() {
-        int width = 400;
-        int height = 300;
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        
-        // Draw background
-        g2d.setColor(new Color(10, 20, 30));
-        g2d.fillRect(0, 0, width, height);
-        
-        // Draw matrix code rain
-        g2d.setFont(new Font("Monospaced", Font.BOLD, 14));
-        for (int i = 0; i < 500; i++) {
-            int x = (int) (Math.random() * width);
-            int y = (int) (Math.random() * height);
-            int charValue = (int) (Math.random() * 2);
-            g2d.setColor(new Color(0, 200 + (int)(Math.random() * 55), 0, 180));
-            g2d.drawString(charValue == 0 ? "0" : "1", x, y);
-        }
-        
-# PATERSON-MD
-
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
-𝐒𝐢𝐦𝐩𝐥𝐞 𝐁𝐞𝐬𝐭 𝐖𝐡𝐚𝐭𝐬𝐚𝐩𝐩 𝐁𝐨𝐭 𝐂𝐫𝐞𝐚𝐭𝐞𝐝 𝐁𝐲 KERVENS AUBOURG 🇭🇹🌝💚
-<div class = "repo" align = "center">
- 
-<a href = "#">
-<img src = "https://files.catbox.moe/usgvo9.jpg"  width="300" height="200">
-</img>
- <p align="center">
-  <a href="#"><img src="http://readme-typing-svg.herokuapp.com?color=ff00ab&center=true&vCenter=true&multiline=false&lines=PATERSON-MD+MD+WHATSAPP+BOT+MD" alt="">
-   
-## 𝐃𝐄𝐏𝐋𝐎𝐘 𝐒𝐄𝐓𝐔𝐏 ↕️
-
-**1. Fork This Repository**
-
-*_Start by forking this repository to your own GitHub account. Click the button below to fork:_*
-
-  <a href="https://github.com/PATERSON-MD/PATERSON-MD/fork"><img title="PATERSON-MD" src="https://img.shields.io/badge/FORK-PATERSON-MDh?color=darkblue&style=for-the-badge&logo=stackshare"></a>
-
-<a><img src='https://i.imgur.com/LyHic3i.gif'/>
-
-🔑 Get Session ID (https://paterson-session-pair-bot.onrender.com/)
-
-> To deploy, generate your session ID from the link below:
-<p align="left">
-  <a href="file:///storage/emulated/0/Android/obb/paterson.html">
-    <img src="https://img.shields.io/badge/%F0%9F%9A%80%20GET%20PAIR%20CODE%20WEB-ffcc00?style=for-the-badge"/>
-  </a>
-</p>
-<a><img src='https://files.catbox.moe/bqs70b.jpg'/>
-
-
-<a><img src='https://i.imgur.com/dBaSKWF.gif'/>
-
-2. **Obtain the Session ID**: After accessing the URL, you should see a session ID displayed. Copy this session ID.
-
-
-   
-  1..DEPLOY ON HEROKU ⤵️
+<div align="center">
   
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?template=https%3A%2F%2Fgithub.com%2Fkingmalvn%2FPATERSON-MD) 
-   
-   
-  2..DEPLOY ON RENDER ⤵️
+![Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&height=200&section=header&text=Kervens%20King&fontSize=60&fontAlignY=35&animation=fadeIn)
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/PATERSON-MD/PATERSON-MD.git)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=26&duration=4000&pause=1000&color=20C20E&center=true&vCenter=true&width=500&lines=Développeur+Full+Stack;Blockchain+Enthusiast;Créateur+de+solutions+digitales)](https://git.io/typing-svg)
 
+</div>
 
-   3..DEPLOY ON GITHUB ⤵️
-
-
-</details>
-
-<b><strong><summary align="center" style="color: Yello;">Deploy On Workflow</summary></strong></b>
-<p style="text-align: center; font-size: 1.2em;">
- 
-<h8>Copy the workflow codes and then frok the repo edit config add session id then save and now click on repo action tag then click on start new workflow then paste workflow codes rename main.yml to deploy.yml and save the file</h8>
-<h3 align-"center"> Important</h3>
-<h6 align-"center">Attention! We do not take responsibility if your github account is suspended through this Deploy method, I advise you not to use this workflow deploy method in the latest github accounts, github accounts created a year or more ago have not received the risk of suspension so far, this works It will only be done for 6 hours, you need to update the code to reactivate it.</h6>
-
-```
-name: Node.js CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Start application
-      run: npm start
-```
-<a><img src='/2105842045486000644_1'/>
-
-### Thank You Dear
-
-> DEVELOPER OF PATERSON-MD 
-- [KERVENS](https://github.com/PATERSON-MD)
-- Creater and Owner Of PATERSON-MD
-
-> PATERSON-MD Helper
-- [KERVENS](https://github.com/PATERSON-MD)
-- For helping in bot plugin files.
 ---
-<a><img src='https://i.imgur.com/LyHic3i.gif'/>
 
+## 💫 Connect With Me
 
-stylé hacker fait l'image 100× plus stylé 🔥 a toi de jouer 
-        // Draw PATERSON-MD text
-        g2d.setColor(new Color(0, 200, 100, 200));
-        g2d.setFont(new Font("Consolas", Font.BOLD, 24));
-        g2d.drawString("PATERSON-MD", width/2-100, height/2);
-        
-        g2d.dispose();
-        return image;
-    }
-    
-    private JButton createHackerButton(String text, Color color) {
-        JButton button = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // Draw gradient background
-                GradientPaint gp = new GradientPaint(0, 0, color.darker(), 
-                        0, getHeight(), color.brighter());
-                g2d.setPaint(gp);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-                
-                // Draw text
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Arial", Font.BOLD, 16));
-                FontMetrics fm = g2d.getFontMetrics();
-                int x = (getWidth() - fm.stringWidth(getText())) / 2;
-                int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent();
-                g2d.drawString(getText(), x, y);
-                
-                // Draw glow effect
-oid main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PatersonMD());
-    }
-}
-RgYhD0N.png" width=20> **Render** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://dashboard.render.com/blueprint/new?repo=https://github.com/KervensAubourg/PATERSON-MD) | Free tier friendly |
-| <img src="https://i.imgur.com/akabD2k.png" width=20> **Koyeb** | [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=https://github.com/KervensAubourg/PATERSON-MD) | Fast global deployment |
-| <img src="https://i.imgur.com/8H7QR4e.png" width=20> **Heroku** | [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?template=https://github.com/KervensAubourg/PATERSON-MD) | Requires credit card |
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/kervensking)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/kervensking)
+[![Portfolio](https://img.shields.io/badge/Portfolio-%23000000.svg?style=for-the-badge&logo=firefox&logoColor=white)](https://kervensking.tech)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:contact@kervensking.tech)
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/your-server)
 
-```bash
-# Local installation
-git clone https://github.com/KervensAubourg/PATERSON-MD
-cd PATERSON-MD
-npm install
-npm start
+---
+
+## 🛠️ Tech Stack
+
+### Langages de Programmation
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-plastic&logo=javascript&logoColor=%23F7DF1E)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-plastic&logo=typescript&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-plastic&logo=python&logoColor=ffdd54)
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-plastic&logo=openjdk&logoColor=white)
+![Solidity](https://img.shields.io/badge/Solidity-%23363636.svg?style=for-the-plastic&logo=solidity&logoColor=white)
+
+### Frontend Development
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-plastic&logo=react&logoColor=%2361DAFB)
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-plastic&logo=next.js&logoColor=white)
+![Vue.js](https://img.shields.io/badge/vue.js-%2335495e.svg?style=for-the-plastic&logo=vuedotjs&logoColor=%234FC08D)
+![Angular](https://img.shields.io/badge/angular-%23DD0031.svg?style=for-the-plastic&logo=angular&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-plastic&logo=tailwind-css&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/bootstrap-%238511FA.svg?style=for-the-plastic&logo=bootstrap&logoColor=white)
+
+### Backend Development
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-plastic&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-plastic&logo=express&logoColor=%2361DAFB)
+![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-plastic&logo=nestjs&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-F2F4F9?style=for-the-plastic&logo=spring-boot)
+
+### Database
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-plastic&logo=mongodb&logoColor=white)
+![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-plastic&logo=mysql&logoColor=white)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-plastic&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-plastic&logo=redis&logoColor=white)
+
+### DevOps & Cloud
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-plastic&logo=amazon-aws&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-plastic&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-plastic&logo=kubernetes&logoColor=white)
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-plastic&logo=git&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-plastic&logo=githubactions&logoColor=white)
+
+### Outils
+![VS Code](https://img.shields.io/badge/VS%20Code-0078d7.svg?style=for-the-plastic&logo=visual-studio-code&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-plastic&logo=postman&logoColor=white)
+![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-plastic&logo=figma&logoColor=white)
+
+---
+
+## 📊 GitHub Stats
+
+<div align="center">
+  
+![Kervens's GitHub Stats](https://github-readme-stats.vercel.app/api?username=KervensKingTech&show_icons=true&theme=radical&hide_border=true&include_all_commits=true&count_private=true)
+
+![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=KervensKingTech&theme=radical&hide_border=true)
+
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=KervensKingTech&layout=compact&theme=radical&hide_border=true&langs_count=8)
+
+</div>
+
+---
+
+## 🏆 GitHub Trophies
+
+![Trophées](https://github-profile-trophy.vercel.app/?username=KervensKingTech&theme=radical&no-frame=true&row=1&column=6&margin-w=15&margin-h=15)
+
+---
+
+## 🚀 Projets Populaires
+
+<div align="center">
+  
+[![Project 1](https://github-readme-stats.vercel.app/api/pin/?username=KervensKingTech&repo=awesome-project-1&theme=radical)](https://github.com/KervensKingTech/awesome-project-1)
+[![Project 2](https://github-readme-stats.vercel.app/api/pin/?username=KervensKingTech&repo=awesome-project-2&theme=radical)](https://github.com/KervensKingTech/awesome-project-2)
+
+[![Project 3](https://github-readme-stats.vercel.app/api/pin/?username=KervensKingTech&repo=awesome-project-3&theme=radical)](https://github.com/KervensKingTech/awesome-project-3)
+[![Project 4](https://github-readme-stats.vercel.app/api/pin/?username=KervensKingTech&repo=awesome-project-4&theme=radical)](https://github.com/KervensKingTech/awesome-project-4)
+
+</div>
+
+---
+
+## 📈 Contribution Graph
+
+![Contribution Graph](https://activity-graph.herokuapp.com/graph?username=KervensKingTech&theme=react-dark&hide_border=true&area=true)
+
+---
+
+## ✍️ Citation Aléatoire
+
+![Quote](https://quotes-github-readme.vercel.app/api?type=horizontal&theme=radical)
+
+---
+
+<div align="center">
+  
+![Visitors](https://komarev.com/ghpvc/?username=KervensKingTech&color=blueviolet&style=flat)
+
+**⭐ N'hésitez pas à visiter mes repos et à laisser une étoile si vous aimez mon travail !**
+
+</div>
+
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&height=150&section=footer&reversal=true)
