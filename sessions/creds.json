@@ -63,117 +63,24 @@ function encodeSessionToPaterson() {
   }
 }
 
-// Configuration vide - à remplir avec votre session
+// VOTRE SESSION - Ajoutée ici
 const config = {
-  SESSION_ID: "" // ← Ajoutez votre session ID ici
+  SESSION_ID: "paterson~eyJub2lzZUtleSI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiWUtZN3cxZHNlUGEvdXVkRXErcWhvOXdvbThiQXJVa3dCNWpUbzJFcGxWcz0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiNkRIS2QwMVVuL1U3MGdPaUpWT3NZejFNajUwUXlIUGxNamhleG5YR3oyWT0ifX0sInBhaXJpbmdFcGhlbWVyYWxLZXlQYWlyIjp7InByaXZhdGUiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiIwTHU3RUtRN3BEdkVyRkY1TGNqcGJyRFpWcnF5MExnZlFHQll4SXdYY0VBPSJ9LCJwdWJsaWMiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJuY0c0VE5UY2NRRVNZdXlLQ2JXRXpOeTZjOW9HVXBMeVl4SndEbVFIeUZVPSJ9fSwic2lnbmVkSWRlbnRpdHlLZXkiOnsicHJpdmF0ZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IlNFdFlDV1U3TFB5anpDZm1tR0tTVDVqSnQzbmNoaUlWdlI0TUNaeVNqMkk9In0sInB1YmxpYyI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6Ii9WRHR6ZE9aSG8vWlBqaFpiRkhhNTdPdDZWSkxYMGpITU5MSVc2WHVWR0k9In19LCJzaWduZWRQcmVLZXkiOnsia2V5UGFpciI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiUUJOaHhFK3ZBWmV1UTh3d1hLWnlHVXNhTXk3eGVDUGlwN3dhZGx4bWZrWT0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiVXZkanY3b3VEN2NjZGVUVFBIYVI1ajhBZURhUW1UUm9JN2NJMUNEUHJ3cz0ifX0sInNpZ25hdHVyZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6Im55NVlWMTZ5YjFVaXlHS2VBNnkycm1ENStGOVRKbHpXeTFTWDU3YVZrT0pUOStYckNpZjVRMmgyWHlGRTRRemFhZEhzdXp1YVZhN0JpeHdhK3RKbUFRPT0ifSwia2V5SWQiOjF9LCJyZWdpc3RyYXRpb25JZCI6NDMsImFkdlNlY3JldEtleSI6IlAzNlA5bnpNZWVmeHRsTTN4TFdQOUMvUjZaQ0F6WEc0OEVIWGx0NXRlK2c9IiwicHJvY2Vzc2VkSGlzdG9yeU1lc3NhZ2VzIjpbXSwibmV4dFByZUtleUlkIjozMSwiZmlyc3RVbnVwbG9hZGVkUHJlS2V5SWQiOjMxLCJhY2NvdW50U3luY0NvdW50ZXIiOjAsImFjY291bnRTZXR0aW5ncyI6eyJ1bmFyY2hpdmVDaGF0cyI6ZmFsc2V9LCJyZWdpc3RlcmVkIjp0cnVlLCJwYWlyaW5nQ29kZSI6IjdFTVIxUEU5IiwibWUiOnsiaWQiOiI1MDk1NTU4NTEzNTozN0BzLndoYXRzYXBwLm5ldCIsImxpZCI6Ijk4MTI3NzcyMTY0MTY5OjM3QGxpZCJ9LCJhY2NvdW50Ijp7ImRldGFpbHMiOiJDS2ZOdzVrRkVJZitsTVlHR0JVZ0FDZ0EiLCJhY2NvdW50U2lnbmF0dXJlS2V5IjoiTndUQUxwWDFZeW1BWUNyQTIwMjR2endYSHpoY0U2RjdVcStJTGtHZlJCND0iLCJhY2NvdW50U2lnbmF0dXJlIjoicDZrem9QMEdYL3R4MjE2bXpZVjZ5bU8xOEJTTmhMckk2RlFyUzltMkhaV1N3dUtqakhjblpSV04xTzZ5Z2RMYXdOQ1R4bDBTYTJIQ2xobEwreWx4Q0E9PSIsImRldmljZVNpZ25hdHVyZSI6ImN0WWtqdnVBdmVkVVgxaTlOKytVN0hybDZjVlRlbWZZeklvU3NUSnlhRk5vQTh3VG1SS1JtYmdSQm1zdXhJeForV0FuSFhBOTlFczJwK3Z4ZkxNSUJBPT0ifSwic2lnbmFsSWRlbnRpdGllcyI6W3siaWRlbnRpZmllciI6eyJuYW1lIjoiNTA5NTU1ODUxMzU6MzdAcy53aGF0c2FwcC5uZXQiLCJkZXZpY2VJZCI6MH0sImlkZW50aWZpZXJLZXkiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJCVGNFd0M2VjlXTXBnR0Fxd050TnVMODhGeDg0WEJPaGUxS3ZpQzVCbjBRZSJ9fV0sInBsYXRmb3JtIjoiYW5kcm9pZCIsInJvdXRpbmdJbmZvIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiQ0FVSURRPT0ifSwibGFzdEFjY291bnRTeW5jVGltZXN0YW1wIjoxNzU3NzU3MjA2LCJsYXN0UHJvcEhhc2giOiIyRzRBbXUiLCJteUFwcFN0YXRlS2V5SWQiOiJBQUFBQUNLYSJ9"
 };
 
-// Charger la session au démarrage si configurée
+// Charger la session au démarrage
 if (config.SESSION_ID) {
   loadBase64Session(config.SESSION_ID).then(session => {
     if (session) {
       console.log("✅ Session chargée avec succès");
       console.log("👤 Utilisateur:", session.me?.name || "Inconnu");
       console.log("📱 Numéro:", session.me?.id || "Inconnu");
+      console.log("📟 Device ID:", session.me?.id.split(':')[1] || "Inconnu");
     } else {
       console.log("🔄 Retour à l'authentification par QR code/code de pairing");
       // Initier le flux d'authentification normal ici
     }
   });
-} else {
-  console.log("ℹ️  Aucune session configurée - authentification normale nécessaire");
-}
-
-// Exporter les fonctions pour une utilisation ailleurs
-module.exports = {
-  loadBase64Session,
-  encodeSessionToPaterson,
-  sessionDir,
-  credsPath
-};const fs = require('fs');
-const path = require('path');
-
-// Session directory setup
-const sessionDir = path.join(__dirname, "./sessions");
-const credsPath = path.join(sessionDir, "creds.json");
-
-if (!fs.existsSync(sessionDir)) {
-  fs.mkdirSync(sessionDir, { recursive: true });
-}
-
-/**
- * Decodes and saves a base64 session (paterson~ prefixed)
- * @param {string} base64Session - Format: "paterson~BASE64_DATA"
- */
-async function loadBase64Session(base64Session) {
-  try {
-    if (!base64Session.startsWith("paterson~")) {
-      throw new Error("Invalid format: Session must start with 'paterson~'");
-    }
-
-    const base64Data = base64Session.replace("paterson~", "");
-    
-    // Validate base64
-    if (!/^[A-Za-z0-9+/=]+$/.test(base64Data)) {
-      throw new Error("Invalid base64 characters detected");
-    }
-
-    // Decode and parse
-    const decodedData = Buffer.from(base64Data, "base64");
-    const sessionData = JSON.parse(decodedData.toString("utf-8"));
-
-    // Save to file
-    fs.writeFileSync(credsPath, decodedData);
-    console.log("✅ Session paterson décodée et sauvegardée avec succès");
-    return sessionData;
-
-  } catch (error) {
-    console.error("❌ Erreur de session paterson:", error.message);
-    return null;
-  }
-}
-
-/**
- * Encode current session to paterson format
- */
-function encodeSessionToPaterson() {
-  try {
-    if (!fs.existsSync(credsPath)) {
-      throw new Error("Aucun fichier de session trouvé");
-    }
-
-    const sessionData = fs.readFileSync(credsPath);
-    const base64Data = sessionData.toString('base64');
-    const patersonSession = `paterson~${base64Data}`;
-
-    console.log("✅ Session encodée en format paterson");
-    return patersonSession;
-
-  } catch (error) {
-    console.error("❌ Erreur d'encodage paterson:", error.message);
-    return null;
-  }
-}
-
-// Configuration vide - à remplir avec votre session
-const config = {
-  SESSION_ID: "" // ← Ajoutez votre session ID ici
-};
-
-// Charger la session au démarrage si configurée
-if (config.SESSION_ID) {
-  loadBase64Session(config.SESSION_ID).then(session => {
-    if (session) {
-      console.log("✅ Session chargée avec succès");
-      console.log("👤 Utilisateur:", session.me?.name || "Inconnu");
-      console.log("📱 Numéro:", session.me?.id || "Inconnu");
-    } else {
-      console.log("🔄 Retour à l'authentification par QR code/code de pairing");
-      // Initier le flux d'authentification normal ici
-    }
-  });
-} else {
-  console.log("ℹ️  Aucune session configurée - authentification normale nécessaire");
 }
 
 // Exporter les fonctions pour une utilisation ailleurs
